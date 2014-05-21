@@ -4,9 +4,10 @@
     "description": "Tantalim Server side files for Node.js web application",
     "repository": {
         "type": "git",
-        "url": "https://github.com/tantalim/tantalim-server"
+        "url": "https://github.com/tantalim/tantalim-server.git"
     },
     "dependencies": {
+        "express": "~3.7.0"
     },
     "devDependencies": {
     }
