@@ -1,0 +1,13 @@
+{
+    "name": "tantalim-server",
+    "version": "0.0.1",
+    "description": "Tantalim Server side files for Node.js web application",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tantalim/tantalim-server"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+    }
+}
