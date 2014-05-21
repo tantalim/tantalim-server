@@ -1,0 +1,25 @@
+<section>
+    <form ng-submit="submit()" ng-controller="SearchController">
+        <h1>{{title}} Search</h1>
+
+        <div class="alert alert-warning">
+            This search doesn't do anything yet. Just click Search to go Back.
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-8 col-sm-4">
+                <button class="btn btn-primary" data-ng-click="">
+                    <span class="glyphicon glyphicon-search"></span>
+                    Search
+                </button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="auditType-name">Table Name</label>
+            <input type="text" class="form-control" id="auditType-name" ng-model="search.TableName">
+        </div>
+        <div class="form-group">
+            <label for="auditType-sql">SQL</label>
+            <input type="text" class="form-control" id="auditType-sql" ng-model="search.TableSQL">
+        </div>
+    </form>
+</section>

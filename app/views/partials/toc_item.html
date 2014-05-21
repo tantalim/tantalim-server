@@ -1,0 +1,7 @@
+<a href="#/p/{{id}}" class="btn btn-default {{bootstrapClassesForToc depth}}"
+   data-ng-class="{active: visibleView=='{{id}}'}">
+    {{title}}
+</a>
+{{#pages}}
+{{> toc_item}}
+{{/pages}}

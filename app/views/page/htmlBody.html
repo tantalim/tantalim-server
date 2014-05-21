@@ -1,0 +1,16 @@
+<section data-ng-controller="PageController">
+    <div id="server-status" class="alert alert-warning" data-ng-show="serverStatus" data-ng-bind="serverStatus"></div>
+    <div id="server-error" class="alert alert-danger" data-ng-show="serverError" data-ng-bind="serverError"
+         data-spy="affix-bottom"></div>
+    <div id="static-content" data-ng-show="staticContent" data-ng-bind="staticContent"></div>
+    {{#if multiPage}}
+    <div id="toc" class="col-sm-3 ui-scrollfix">
+        {{> toc_item}}
+    </div>
+    <div id="page-deck" class="col-sm-9">
+        {{> page }}
+    </div>
+    {{else}}
+    {{> page }}
+    {{/if}}
+</section>

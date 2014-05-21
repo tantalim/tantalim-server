@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" ng-app="tantalim.desktop">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>{{title}} - {{appName}}</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <link href="/img/icons/favicon.ico" rel="shortcut icon" type="image/x-icon">
+
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.bootstrap3.css">
+
+    <link rel="stylesheet" href="/lib/angular-ui-select/dist/select.css">
+    <link rel="stylesheet" href="/lib/angular-grid/ng-grid.min.css">
+    <!--<link rel="stylesheet" href="/lib/angular-grid/lib/bootstrap/css/bootstrap-responsive.css">-->
+    <link rel="stylesheet" href="/css/common.css">
+
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" data-role="navigation">
+    <div class="" data-ng-controller="HeaderController">
+
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Tantalim</a>
+        </div>
+
+        <div class="navbar-collapse collapse in hidden-xs" style="height: auto;">
+            <ul class="navbar-nav nav">
+                <li class="dropdown" data-ng-repeat="header in menu" data-ng-show="global.user">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-ng-bind="header.title"></a>
+                    <ul class="dropdown-menu">
+                        <li data-ng-repeat="item in header.items">
+                            <a href="{{ngVar 'item.link'}}" data-ng-bind="item.title"></a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="navbar-nav nav pull-right" data-ng-hide="global.authenticated">
+                <li>
+                    <a href="#" popover-placement="bottom" popover="User session management is not implemented">Sign In</a>
+                </li>
+                <li>
+                    <a href="#" popover-placement="bottom" popover="User session management is not implemented">Sign Up</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav nav pull-right" data-ng-show="global.authenticated">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span data-ng-bind="global.user.name" /> <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Nothing Here Yet</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<section class="content container">
+    <section data-ng-view />
+</section>
+<div class="visible-xs alert alert-info">
+    Try the <a href="/m/">Mobile Version</a>
+</div>
+<script type="text/javascript">
+    window.pageName = '{{pageName}}';
+    window.user = {
+        username: 'trevorallred',
+        name: 'Trevor Allred (AUTO)'
+    };
+</script>
+
+<!-- jQuery (for ng-grid) -->
+<!-- not sure if we want to keep this -->
+<script type="text/javascript" src="/lib/angular-grid/lib/jquery-1.9.1.js"></script>
+<!-- Angular JS -->
+<script type="text/javascript" src="/lib/angular/angular.min.js"></script>
+<script type="text/javascript" src="/lib/angular-sanitize/angular-sanitize.min.js"></script>
+
+<script type="text/javascript" src="/lib/angular-cookies/angular-cookies.min.js"></script>
+<script type="text/javascript" src="/lib/angular-resource/angular-resource.min.js"></script>
+<script type="text/javascript" src="/lib/angular-route/angular-route.js"></script>
+<!-- Angular UI -->
+<script type="text/javascript" src="/lib/angular-bootstrap/ui-bootstrap.js"></script>
+<script type="text/javascript" src="/lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script type="text/javascript" src="/lib/angular-grid/ng-grid-2.0.7.min.js"></script>
+<script type="text/javascript" src="/lib/angular-ui-utils/ui-utils.min.js"></script>
+<script type="text/javascript" src="/lib/angular-ui-select/dist/select.js"></script>
+
+<!-- Other JS -->
+<script type="text/javascript" src="/lib/lodash/dist/lodash.min.js"></script>
+<!-- Tantalim JS -->
+<script type="text/javascript" src="/js/tantalim.desktop.js"></script>
+<script type="text/javascript" src="/page-definition/{{pageName}}"></script>
+</body>
+</html>

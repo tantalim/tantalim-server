@@ -1,0 +1,77 @@
+<div class="app" data-ng-controller="PageController">
+    <!-- Navbars -->
+    <div class="navbar navbar-app navbar-absolute-top">
+        <div class="navbar-brand navbar-brand-center">
+            <span>{{title}}</span>
+        </div>
+
+        <div class="btn-group pull-left">
+            <div class="btn btn-navbar sidebar-toggle" data-ng-click="toggle('mainSidebar')">
+                <i class="fa fa-bars"></i> Menu
+            </div>
+        </div>
+    </div>
+
+    <div class="navbar navbar-app navbar-absolute-bottom">
+        <div class="btn-group pull-left">
+            <div class="btn btn-navbar" data-ng-click="">
+                <i class="fa fa-plus"></i> New
+            </div>
+        </div>
+
+        <!--<div class="alert alert-warning" data-ng-show="serverStatus" data-ng-bind="serverStatus"></div>-->
+        <!--<div class="alert alert-danger" data-ng-show="serverError" data-ng-bind="serverError"></div>-->
+    </div>
+
+    <div class="app-body" ng-class="{loading: loading}">
+        <div ng-show="loading" class="app-content-loading">
+            <i class="fa fa-spinner fa-spin loading-spinner"></i>
+        </div>
+
+        <div id="static-content" data-ng-show="staticContent" data-ng-bind="staticContent"></div>
+
+        <div id="list-{{id}}" class="app-content" data-ng-show="!loading && currentPage == 'list-{{id}}'">
+            <div class="content-expanded" data-ng-hide="current.sets.{{modelName}}.rows.length">
+                No Data Found
+            </div>
+            <div class="scrollable">
+                <div class="scrollable-content">
+                    <div class="list-group">
+                        <a href="#/detail/{{id}}/{{ngVar 'row.id'}}" class="list-group-item"
+                           data-ng-repeat="row in current.sets.{{modelName}}.rows">
+                            {{#quickView}}
+                            <span data-ng-bind="row.data.{{fieldName}}"></span>
+                            {{/quickView}}
+                            <i class="fa fa-chevron-right pull-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="detail-{{id}}" class="app-content" data-ng-show="!loading && currentPage == 'detail-{{id}}'"
+             ng-swipe-right="current.sets.{{modelName}}.movePrevious()"
+             ng-swipe-left="current.sets.{{modelName}}.moveNext()">
+            <div class="scrollable">
+                <div class="scrollable-content">
+                    <form>
+                        <div class="panel" title="{{title}}">
+                            <div class="panel-body">
+                                {{#formFields}}
+                                <div class="form-group">
+
+                                    <label for="{{../id}}-{{fieldName}}">{{fieldLabel}}</label>
+                                    <input type="text" class="form-control" id="{{../id}}-{{fieldName}}"
+                                           data-ng-model="current.instances.{{../modelName}}.data.{{fieldName}}"
+                                           ng-change="rowChanged(current.instances.{{../modelName}})"
+                                    {{#if disabled}}disabled{{/if}}
+                                    >
+                                </div>
+                                {{/formFields}}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

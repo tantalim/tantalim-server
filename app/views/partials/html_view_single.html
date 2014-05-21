@@ -1,0 +1,44 @@
+{{#formFields}}
+<div class="form-group">
+    {{#fieldType fieldType 'text'}}
+        <label for="{{../../modelName}}-{{fieldName}}">{{fieldLabel}}</label>
+        <input type="text" class="form-control" id="{{../../modelName}}-{{fieldName}}"
+               data-ng-model="current.instances.{{../../modelName}}.data.{{fieldName}}"
+               ng-change="rowChanged(current.instances.{{../../modelName}})"
+        {{#if disabled}}disabled{{/if}}
+        >
+    {{/fieldType}}
+    {{#fieldType fieldType 'select'}}
+        <label for="{{../../modelName}}-{{fieldName}}">{{fieldLabel}}</label>
+        <ui-select ng-model="current.instances.{{../../modelName}}.data.{{fieldName}}"
+                   tnt-model="current.instances.{{../../modelName}}.data"
+                   tnt-copy="{{json this.select.copy}}"
+                   tnt-field="{{fieldName}}"
+                   id="{{../../modelName}}-{{fieldName}}">
+            <match placeholder="Select..." />
+            <choices repeat="row in listSmartSelect.{{select.model}}"
+                     refresh="runSmartSelect('{{this.select.model}}', '{{../../modelName}}', $select.search)"
+                     refresh-delay="0">
+                <div ng-bind-html="row.data.{{select.display}} | highlight: $select.search"></div>
+            </choices>
+        </ui-select>
+        <input class="form-control" data-ng-model="current.instances.{{../../modelName}}.data.{{fieldName}}" disabled>
+    {{/fieldType}}
+    {{#fieldType fieldType 'checkbox'}}
+        <div class="checkbox">
+            <label class="ui-checkbox" for="{{../../modelName}}-{{fieldName}}">
+                <input type="checkbox" id="{{../../modelName}}-{{fieldName}}"
+                       data-ng-model="current.instances.{{../../modelName}}.data.{{fieldName}}"
+                       ng-change="rowChanged(current.instances.{{../../modelName}})">
+                {{fieldLabel}}
+            </label>
+        </div>
+    {{/fieldType}}
+</div>
+{{/formFields}}
+
+{{#children}}
+<div>
+    {{> html_view}}
+</div>
+{{/children}}
