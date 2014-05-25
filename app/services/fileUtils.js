@@ -11,7 +11,7 @@ function getExtension(filename) {
     return (i < 0) ? '' : filename.substr(i + 1);
 }
 
-function getListByTypeAndName(subDirectory, fileNameMatch) {
+function getListByTypeAndName(rootDir, subDirectory, fileNameMatch) {
 
     return new Promise(function (resolve, reject) {
         var readListOfOrganizations = function (rootDir, organizations) {
@@ -77,8 +77,6 @@ function getListByTypeAndName(subDirectory, fileNameMatch) {
 
                 var models = _.flatten(modelsArray);
                 logger.debug('DONE processModelsByModule', models);
-
-                console.info(models);
                 resolve(models);
             }
 
@@ -110,7 +108,6 @@ function getListByTypeAndName(subDirectory, fileNameMatch) {
             async.map(organizationList, getModules, processModulesByOrg);
         };
 
-        var rootDir = './app_modules';
         fs.readdir(rootDir, function (err, directoryList) {
             if (err) {
                 return reject(err);
@@ -122,22 +119,22 @@ function getListByTypeAndName(subDirectory, fileNameMatch) {
 
 function getJsonFromFile(fileLocation) {
     return new Promise(function (resolve, reject) {
-        var file = fileLocation.rootDir + '/' +
-            fileLocation.organization + '/' +
-            fileLocation.module + '/' +
-            fileLocation.type + '/' +
-            fileLocation.name;
+        var file = fileLocation.rawFilePath;
 
         logger.debug('getJsonFromFile ' + file);
         fs.readFile(file, 'utf8', function (err, data) {
             if (err) {
-                reject(err);
+                return reject(err);
             }
             // TODO figure out how to get this not to crash when getting bad JSON
-            logger.debug('parsing...');
-            logger.debug(data);
-            var json = JSON.parse(data);
-            resolve(json);
+            try {
+                logger.debug('parsing...');
+                logger.debug(data);
+                var json = JSON.parse(data);
+                resolve(json);
+            } catch (e) {
+                resolve('failed');
+            }
         });
     });
 }

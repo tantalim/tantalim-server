@@ -2,10 +2,10 @@
 
 var config = require('../config');
 var service = require('../' + config.appRoot + 'app/services/fileUtils');
-//var should = require('should');
 
 describe('File Utils Service', function () {
-    it('should find page in dir', function (done) {
+    // TODO Mock the node fs utility so we're not actually hitting the filesystem
+    it.skip('should find page in dir', function (done) {
         service.getListByTypeAndName('pages', 'TestUnit').should.eventually.eql([
             {
                 storageType: 'FILE',

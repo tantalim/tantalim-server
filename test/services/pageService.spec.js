@@ -28,7 +28,6 @@ describe('Page service', function () {
 
         it('should not find the file', function (done) {
             fileUtils.getListByTypeAndName = Promise.method(function () {
-                console.info('Called getListByTypeAndName correctly');
                 return [];
             });
 

@@ -1,7 +1,7 @@
 'use strict';
 
 var fileUtils = require('./fileUtils'),
-//    pageDS = require('./db/pageDatabaseService'),
+    pageDS = require('./db/pageDatabaseService'),
     jsonUtils = require('./jsonUtils'),
     logger = require('../logger/default').main,
 //    _ = require('lodash'),
@@ -20,10 +20,11 @@ function getLocationByName(pageName) {
     logger.info('starting getLocationByName for %s', pageName);
 
     function getBestResult(results) {
-        var bestFileOption = results.fileOptions[0] || null;
+        var bestTantalimOption = results.tantalimDir[0] || null;
+        var bestAppOption = results.appDir[0] || null;
         var bestDatabaseOption = results.databaseOptions[0] || null;
 
-        return bestDatabaseOption || bestFileOption;
+        return bestDatabaseOption || bestAppOption || bestTantalimOption;
     }
 
 //    function convertDbToResults(data) {
@@ -37,8 +38,17 @@ function getLocationByName(pageName) {
 
     return new Promise(function (resolve, reject) {
         async.parallel({
-            fileOptions: function (done) {
-                fileUtils.getListByTypeAndName('pages', pageName).then(function (data) {
+            tantalimDir: function (done) {
+                var rootDir = './tantalim_modules';
+                fileUtils.getListByTypeAndName(rootDir, 'pages', pageName).then(function (data) {
+                    done(null, data);
+                }, function (err) {
+                    done(jsonUtils.error('fileOptions-Reject', err), null);
+                });
+            },
+            appDir: function (done) {
+                var rootDir = './app_modules';
+                fileUtils.getListByTypeAndName(rootDir, 'pages', pageName).then(function (data) {
                     done(null, data);
                 }, function (err) {
                     done(jsonUtils.error('fileOptions-Reject', err), null);
@@ -47,9 +57,9 @@ function getLocationByName(pageName) {
             databaseOptions: function (done) {
                 done(null, []);
                 // TODO finish getting pages from the database
-//                logger.info('starting databaseOptions');
-//                logger.info(pageDS);
-//                pageDS.getPage(pageName)
+                logger.info('starting databaseOptions');
+                logger.info(pageDS);
+    //                pageDS.getPage(pageName)
 //                    .then(function (data) {
 //                        done(null, convertDbToResults(data));
 //                    }, function (err) {
