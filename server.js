@@ -51,7 +51,7 @@ var start = function () {
     }));
 
     // Only use logger for development environment
-    if (process.env.NODE_ENV === 'development') {
+    if (config.environment === 'development') {
         app.use(express.logger('dev'));
     }
 
@@ -62,10 +62,9 @@ var start = function () {
         helpers: require('./app/services/handlebarHelpers'),
 
         extname: '.html',
-        // Uses multiple partials dirs, templates in "shared/templates/" are shared
-        // with the client-side of the app (see below).
         partialsDir: [
-            'app/views/partials/'
+            'app/views/partials/',
+            'node_modules/tantalim-server/app/views/partials/'
         ]
     });
 
