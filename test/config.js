@@ -1,9 +1,9 @@
 'use strict';
 
 var config = {
-    appRoot: '../../'
+    appRoot: '../'
 };
 module.exports = config;
-
-var app = require(config.appRoot + 'main');
-module.exports.app = app;
+//
+//var app = require(config.appRoot + 'main');
+//module.exports.app = app;

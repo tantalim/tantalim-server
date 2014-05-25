@@ -49,7 +49,7 @@ module.exports = function (grunt) {
 //                    '../../../src/main',
                 ]
             },
-            src: ['test/mocha/**/*.js']
+            src: ['test/**/*.js']
         }
     });
 
