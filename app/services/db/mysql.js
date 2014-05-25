@@ -2,6 +2,8 @@
 
 // Just testing require files
 var config = require('../../../config/config');
+console.info('config');
+console.info(config);
 var Knex = require('knex');
 Knex.knex = Knex.initialize({
     client: 'mysql',

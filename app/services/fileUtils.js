@@ -110,7 +110,7 @@ function getListByTypeAndName(subDirectory, fileNameMatch) {
             async.map(organizationList, getModules, processModulesByOrg);
         };
 
-        var rootDir = './app';
+        var rootDir = './app_modules';
         fs.readdir(rootDir, function (err, directoryList) {
             if (err) {
                 return reject(err);

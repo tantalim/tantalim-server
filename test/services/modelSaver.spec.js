@@ -3,10 +3,8 @@
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
-//    sinon = require('sinon'),
     Promise = require('bluebird'),
-//    knex = require('knex').knex,
-    knexProxy = {},
+    knexProxy = {knex: {}},
     tableServiceProxy = {},
     chai = require('chai');
 
@@ -21,6 +19,8 @@ describe('Model Saver', function () {
             'knex': knexProxy,
             './tableService': tableServiceProxy
         });
+        knexProxy.knex = {};
+        knexProxy.knex.client = {};
 
         this.modelDefinition = {
             data: { modelName: 'UnitTestModel' },

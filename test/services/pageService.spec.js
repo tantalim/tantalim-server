@@ -2,7 +2,6 @@
 
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
-//    sinon = require('sinon'),
     proxyquire = require('proxyquire'),
     Promise = require('bluebird'),
     fileUtils = {},
@@ -28,36 +27,23 @@ describe('Page service', function () {
         });
 
         it('should not find the file', function (done) {
-            fileUtils.getListByType = Promise.method(function () {
+            fileUtils.getListByTypeAndName = Promise.method(function () {
+                console.info('Called getListByTypeAndName correctly');
                 return [];
             });
 
-            service.getPageByName('FileDoesNotExist').should.eventually.eql({
+            service.getLocationByName('FileDoesNotExist').should.eventually.eql({
                 error: 'PAGE_NOT_FOUND',
                 content: {
                     staticContent: 'Page does not exist for FileDoesNotExist'
                 }
-            }).notify(done);
-        });
-
-        it('should find the raw file', function (done) {
-            fileUtils.getListByType = Promise.method(function () {
-                return [
-                    {
-                        name: 'RawFile',
-                        storageType: 'FILE',
-                        path: 'foo/bar/RawFile.js'
-                    }
-                ];
-            });
-
-            service.getPageByName('RawFile').should.eventually.eql({
-                rawFilePath: 'foo/bar/RawFile.js'
-            }).notify(done);
+            }).notify( function(){ done(); });
+            // function(){ done(); }
+            // See https://github.com/visionmedia/mocha/issues/1187
         });
 
         it('should find the page file', function (done) {
-            fileUtils.getListByType = Promise.method(function () {
+            fileUtils.getListByTypeAndName = Promise.method(function () {
                 return [
                     {
                         name: 'PageFile',
@@ -67,12 +53,14 @@ describe('Page service', function () {
                 ];
             });
 
-            service.getPageByName('PageFile').should.eventually.eql({
-                page: '../PageFile.json'
+            service.getLocationByName('PageFile').should.eventually.eql({
+                name: 'PageFile',
+                storageType: 'FILE',
+                path: 'foo/bar/PageFile.json'
             }).notify(done);
         });
 
-        it('should find the page in DB', function (done) {
+        it.skip('should find the page in DB', function (done) {
 //            pageDao.getPageSql = function (name) {
 //                return {
 //                    toSql: function () {
@@ -80,13 +68,13 @@ describe('Page service', function () {
 //                    }
 //                }
 //            };
-//
-            service.getPageByName('TestDatabasePage').should.eventually.eql({
+
+            service.getLocationByName('TestDatabasePage').should.eventually.eql({
                 content: {
                     page: {},
                     model: {}
                 }
-            }).notify(done);
+            }).notify( function(){ done(); });
 //            done();
         });
     });

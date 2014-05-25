@@ -249,14 +249,14 @@ exports.save = function (modelDefinition, data) {
                     resolveEach();
                 })
                 .catch(function (err) {
-                    console.error('failed on saveSingleRow catch');
-                    console.error(modelDefinition);
-                    console.error(row);
+                    logger.error('failed on saveSingleRow catch');
+                    logger.error(modelDefinition);
+                    logger.error(row);
                     resolveEach(err);
                 });
         }, function (err) {
             if (err) {
-                console.error('failed on save async each resolveEach');
+                logger.error('failed on save async each resolveEach');
                 reject(err);
             }
             resolve(data);

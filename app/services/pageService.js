@@ -1,10 +1,10 @@
 'use strict';
 
 var fileUtils = require('./fileUtils'),
-    pageDS = require('./db/pageDatabaseService'),
+//    pageDS = require('./db/pageDatabaseService'),
     jsonUtils = require('./jsonUtils'),
     logger = require('../logger/default').main,
-    _ = require('lodash'),
+//    _ = require('lodash'),
     async = require('async'),
     Promise = require('bluebird');
 
@@ -17,7 +17,7 @@ var fileUtils = require('./fileUtils'),
 
 function getLocationByName(pageName) {
 
-    logger.info('starting getLocationByName');
+    logger.info('starting getLocationByName for %s', pageName);
 
     function getBestResult(results) {
         var bestFileOption = results.fileOptions[0] || null;
@@ -26,43 +26,14 @@ function getLocationByName(pageName) {
         return bestDatabaseOption || bestFileOption;
     }
 
-//    function convertResults(bestOption) {
-//
-//        if (bestOption.storageType === 'FILE') {
-//            if (endsWith(bestOption.name, '.html')) {
-//                return {
-//                    rawFilePath: fileUtils.convertLocationObjectToPath(bestOption)
-//                };
-//            } else if (endsWith(bestOption.name, '.json')) {
-//                return {
-//                    jsonFile: bestOption
-//                };
-//            } else {
-//                throw new Error('Found invalid page type ' + bestOption.name);
-//            }
-//        } else {
-//            // READ Page from DB
-//            var pageJson = {
-//
-//            };
-//
-//            return {
-//                content: {
-//                    page: pageJson,
-//                    model: {}
+//    function convertDbToResults(data) {
+//        return _.map(data, function (db) {
+//            return _.defaults(db, {
+//                    storageType: 'DATABASE'
 //                }
-//            };
-//        }
+//            );
+//        });
 //    }
-
-    function convertDbToResults(data) {
-        return _.map(data, function (db) {
-            return _.defaults(db, {
-                    storageType: 'DATABASE'
-                }
-            );
-        });
-    }
 
     return new Promise(function (resolve, reject) {
         async.parallel({
@@ -74,27 +45,32 @@ function getLocationByName(pageName) {
                 });
             },
             databaseOptions: function (done) {
-                logger.info('databaseOptions');
-                pageDS.getPage(pageName)
-                    .then(function (data) {
-                        done(null, convertDbToResults(data));
-                    }, function (err) {
-                        done(jsonUtils.error('getPageSql-Reject', err), null);
-                    })
-                    .catch(function (err) {
-                        logger.info('getPageSql-Catch');
-                        done(jsonUtils.error('getPageSql-Catch', err), null);
-                    });
+                done(null, []);
+                // TODO finish getting pages from the database
+//                logger.info('starting databaseOptions');
+//                logger.info(pageDS);
+//                pageDS.getPage(pageName)
+//                    .then(function (data) {
+//                        done(null, convertDbToResults(data));
+//                    }, function (err) {
+//                        done(jsonUtils.error('getPageSql-Reject', err), null);
+//                    })
+//                    .catch(function (err) {
+//                        logger.info('getPageSql-Catch');
+//                        done(jsonUtils.error('getPageSql-Catch', err), null);
+//                    });
             }
         }, function (err, results) {
             if (err) {
                 logger.error('failed');
-                reject(err);
+                logger.error(err);
+                return reject(err);
             }
             logger.info(results);
 
             var bestOption = getBestResult(results);
             if (!bestOption) {
+                logger.info('no options found');
                 return reject(jsonUtils.error('PAGE_NOT_FOUND', 'Page does not exist for ' + pageName));
             }
             resolve(bestOption);
