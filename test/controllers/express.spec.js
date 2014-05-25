@@ -12,5 +12,5 @@ describe('Express App', function () {
             .set('Accept', 'application/json')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200, done);
-    })
+    });
 });

@@ -2,7 +2,7 @@
 
 var config = require('../config');
 var service = require('../' + config.appRoot + 'app/services/fileUtils');
-var should = require('should');
+//var should = require('should');
 
 describe('File Utils Service', function () {
     it('should find page in dir', function (done) {

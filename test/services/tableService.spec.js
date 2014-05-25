@@ -3,9 +3,9 @@
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
-    sinon = require('sinon'),
+//    sinon = require('sinon'),
     Promise = require('bluebird'),
-    knex = require('knex').knex,
+//    knex = require('knex').knex,
     knexProxy = {},
     chai = require('chai');
 
@@ -17,7 +17,8 @@ var service = proxyquire(configAppRoot + 'services/tableService', {
     'knex': knexProxy
 });
 
-xdescribe('Table Service', function () {
+// TODO Get this to pass tests
+describe('Table Service', function () {
     it('get table', function () {
         var expected = {
             columns: []
@@ -33,7 +34,7 @@ xdescribe('Table Service', function () {
         };
         var table = {
             primaryIndex: pk
-        }
+        };
 
         return service.getPrimaryKey(table).should.eql(pk);
     });

@@ -3,9 +3,9 @@
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
-    sinon = require('sinon'),
+//    sinon = require('sinon'),
     Promise = require('bluebird'),
-    knex = require('knex').knex,
+//    knex = require('knex').knex,
     knexProxy = {},
     tableServiceProxy = {},
     chai = require('chai');
@@ -24,11 +24,26 @@ describe('Model Saver', function () {
 
         this.modelDefinition = {
             data: { modelName: 'UnitTestModel' },
-            basisTable: { tableName: 'TestUnit', dbName: 'test_unit', primaryKey: {columnName: 'ID', dbName: 'id'}},
-            primaryKey: { fieldName: 'TestID' },
+            basisTable: {
+                tableName: 'TestUnit',
+                dbName: 'test_unit',
+                primaryKey: {columnName: 'ID', dbName: 'id'}
+            },
+            primaryKey: {
+                fieldName: 'TestID'
+            },
             fields: [
-                { fieldName: 'TestID', basisColumn: {columnName: 'ID', dbName: 'id'}, fieldStep: null, updateable: false },
-                { fieldName: 'TestName', basisColumn: {columnName: 'Name', dbName: 'name'}, fieldStep: null }
+                {
+                    fieldName: 'TestID',
+                    basisColumn: {columnName: 'ID', dbName: 'id'},
+                    fieldStep: null,
+                    updateable: false
+                },
+                {
+                    fieldName: 'TestName',
+                    basisColumn: {columnName: 'Name', dbName: 'name'},
+                    fieldStep: null
+                }
             ],
             fieldSteps: []
         };
@@ -106,7 +121,7 @@ describe('Model Saver', function () {
 
     it('should insert three rows', function () {
         var _counter = 0;
-        knexProxy.knex.client.query = Promise.method(function (builder) {
+        knexProxy.knex.client.query = Promise.method(function () {
             _counter++;
             return [_counter];
         });
@@ -151,7 +166,9 @@ describe('Model Saver', function () {
 
     it('should only update columns on this table', function () {
         this.modelDefinition.fields.push({
-            fieldName: 'ParentTestName', basisColumn: {columnName: 'Name', dbName: 'name'}, fieldStep: 1
+            fieldName: 'ParentTestName',
+            basisColumn: {columnName: 'Name', dbName: 'name'},
+            fieldStep: 1
         });
 
         this.modelDefinition.fieldSteps.push({

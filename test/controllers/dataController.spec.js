@@ -4,9 +4,9 @@ var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
     Promise = require('bluebird'),
-    sinon = require('sinon'),
-    async = require('async'),
-    should = require('should');
+    sinon = require('sinon');
+//    async = require('async'),
+//    should = require('should')
 
 describe('Data Controller', function () {
     describe('save', function () {
@@ -52,8 +52,8 @@ describe('Data Controller', function () {
         });
 
         function getJsonResponse(response) {
-            return response.jsonp.args[0][0]
-        };
+            return response.jsonp.args[0][0];
+        }
 
         it('should error with bad model', function () {
             var res = this.mockResponse;

@@ -2,7 +2,7 @@
 
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
-    sinon = require('sinon'),
+//    sinon = require('sinon'),
     proxyquire = require('proxyquire'),
     Promise = require('bluebird'),
     fileUtils = {},
@@ -11,12 +11,14 @@ var config = require('../config'),
 chai.Should();
 chai.use(require('chai-as-promised'));
 
-xdescribe('Page service', function () {
+describe('Page service', function () {
     describe('getPageByName', function () {
-        var service, res,
-            req = {
-                pageName: 'TestPage'
-            };
+        var service;
+
+//        ,
+//        req = {
+//            pageName: 'TestPage'
+//        }
 
         beforeEach(function () {
             service = proxyquire(configAppRoot + 'services/pageService', {

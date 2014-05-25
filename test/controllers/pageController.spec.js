@@ -1,4 +1,5 @@
 'use strict';
+/*jshint expr: true*/
 
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
@@ -38,7 +39,7 @@ describe('Page Controller', function () {
                             return id;
                         }, handleReject);
                 }, handleReject);
-        };
+        }
 
         it('should run Promises', function (done) {
 

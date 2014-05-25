@@ -4,7 +4,8 @@ var config = require('../config');
 var service = require('../' + config.appRoot + 'app/services/modelService');
 var should = require('should');
 
-xdescribe('Model Service', function () {
+// TODO Get this to pass tests
+describe('Model Service', function () {
     describe('toWhere', function () {
         it('should require a model name', function () {
             should(function () {
