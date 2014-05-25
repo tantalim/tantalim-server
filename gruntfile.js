@@ -5,21 +5,16 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         watch: {
-            js: {
-                files: ['gruntfile.js', 'server.js', 'app/**/*.js',
-                    'public/js/common/**/*.js',
-                    'public/js/mobile/**/*.js',
-                    'public/js/page/**/*.js',
-                    '../test/**/*.js'],
-                tasks: ['concat'],
-                options: {
-                    livereload: true
-                }
+            jshint: {
+                files: ['gruntfile.js', 'server.js', 'app/**/*.js', 'test/**/*.js'],
+                tasks: ['jshint']
             },
             mocha: {
                 files: ['app/**/*.js', 'test/**/*.js'],
                 options: {
-                    livereload: true
+                    spawn: true,
+                    interrupt: true,
+                    debounceDelay: 250
                 },
                 tasks: ['mochaTest']
             }
@@ -36,18 +31,9 @@ module.exports = function (grunt) {
                 }
             }
         },
-        concurrent: {
-            tasks: ['mochaTest', 'watch'],
-            options: {
-                logConcurrentOutput: true
-            }
-        },
         mochaTest: {
             options: {
-                reporter: 'spec', //'spec', 'dot',
-                require: [
-//                    '../../../src/main',
-                ]
+                reporter: 'spec' // spec or dot
             },
             src: ['test/**/*.js']
         }
@@ -57,10 +43,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-mocha-test');
-    grunt.loadNpmTasks('grunt-concurrent');
-//    grunt.loadNpmTasks('grunt-env');
 
     //Default task(s).
-    grunt.registerTask('default', ['concurrent']);
-    grunt.registerTask('concurrent', ['mochaTest','jshint']);
+    grunt.registerTask('default', ['jshint', 'watch']);
+    grunt.registerTask('test', ['mochaTest']);
 };
