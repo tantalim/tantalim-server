@@ -10,19 +10,20 @@
         "express": "~3.7.0",
         "express3-handlebars": "latest",
         "connect-flash": "~0.1.1",
-        "crypto": "0.0.3",
         "lodash": "~2.4.1",
         "view-helpers": "~0.1.4",
         "async": "~0.2.10",
         "bluebird": "~1.1.0",
-        "grunt": "~0.4.2",
-        "grunt-env": "~0.4.1",
-        "grunt-contrib-watch": "~0.5.3",
         "knex": "~0.5.7",
         "winston": "~0.7.2"
     },
     "devDependencies": {
         "proxyquire": "~0.5.3",
+        "grunt": "~0.4.2",
+        "grunt-env": "~0.4.1",
+        "grunt-concurrent": "~0.4.2",
+        "grunt-contrib-watch": "~0.5.3",
+        "grunt-contrib-jshint": "~0.8.0",
         "grunt-mocha-test": "latest"
     }
 }

@@ -6,113 +6,68 @@ var Promise = require('bluebird'),
     _ = require('lodash'),
     fs = require('fs');
 
-exports.getPathToRawDirUsingFileSystem = function (pageName) {
-    return './raw/' + pageName + '/';
-};
-
-exports.getPathToRawDirUsingRequire = function (pageName) {
-    return '../../raw/' + pageName + '/';
-};
-
-var moduleDir = {
-    rootDir: function () {
-        // We may want to consider getting the directory from application configuration
-        return './tantalim_modules/';
-    },
-    organization: function (name) {
-        return this.rootDir() + name + '/';
-    },
-    module: function (location) {
-        return this.organization(location.organization) + location.module + '/';
-    }
-};
-exports.moduleDir = moduleDir;
-
-function modelLocation(organization, module, name) {
-    var self = {};
-    self.organization = organization;
-    self.module = module;
-    self.name = name;
-    /**
-     * FILE or DB
-     * @type {string}
-     */
-    self.storageType = 'FILE';
-    return self;
-}
-
-function getModulesByOrg(organizationName, callback) {
-    fs.readdir(moduleDir.organization(organizationName), function (err, modules) {
-        if (err) {
-            return callback(err);
-        }
-
-        var moduleCollection = _.map(modules, function (module) {
-            return modelLocation(organizationName, module);
-        });
-
-        callback(err, moduleCollection);
-    });
-}
-
 function getExtension(filename) {
     var i = filename.lastIndexOf('.');
     return (i < 0) ? '' : filename.substr(i + 1);
 }
 
-function convertLocationObjectToPath(fileObject) {
-    return './tantalim_modules/' +
-        fileObject.organization + '/' +
-        fileObject.module + '/' +
-        fileObject.type + '/' +
-        fileObject.name;
-}
-
 function getListByTypeAndName(subDirectory, fileNameMatch) {
 
-    function getSubDirByModule(location, callback) {
-        var path = moduleDir.module(location) + subDirectory + '/';
+    return new Promise(function (resolve, reject) {
+        var readListOfOrganizations = function (rootDir, organizations) {
+            function getSubDirByModule(module, callback) {
+                var path = module.rawFilePath + '/' + subDirectory;
 
-        fs.readdir(path, function (err, fileNames) {
-            if (err) {
-                if (err.code === 'ENOENT') {
-                    logger.warn('Could not find "' + subDirectory + '" directory for: ', location);
-                    callback(null, []);
-                    return;
-                }
-                callback(err);
-                return;
+                fs.readdir(path, function (err, fileNames) {
+                    if (err) {
+                        if (err.code === 'ENOENT') {
+                            logger.warn('Could not find "' + subDirectory + '" directory for: ', module.module);
+                            callback(null, []);
+                            return;
+                        }
+                        callback(err);
+                        return;
+                    }
+
+                    logger.debug('getSubDirByModule for', module.module);
+
+                    var validExtensions = ['js', 'html', 'json'];
+                    fileNames = _.filter(fileNames, function (fileName) {
+                        return _.some(validExtensions, function (extension) {
+                            return (fileName === fileNameMatch + '.' + extension);
+                        });
+                    });
+                    logger.debug(fileNames);
+
+                    var dirCollection = _.map(fileNames, function (fileName) {
+                        return _.defaults({
+                            name: fileName,
+                            type: subDirectory,
+                            extension: getExtension(fileName),
+                            rawFilePath: path + '/' + fileName
+                        }, module);
+                    });
+
+                    callback(err, dirCollection);
+                });
             }
 
-            logger.debug('getSubDirByModule for', location);
+            function getModules(organization, callback) {
+                fs.readdir(organization.rawFilePath, function (err, directoryList) {
+                    if (err) {
+                        return callback(err);
+                    }
 
-            var validExtensions = ['js', 'html', 'json'];
-            fileNames = _.filter(fileNames, function (fileName) {
-                return _.some(validExtensions, function (extension) {
-                    return (fileName === fileNameMatch + '.' + extension);
+                    var moduleCollection = _.map(directoryList, function (moduleName) {
+                        var module = _.defaults({
+                            module: moduleName,
+                            rawFilePath: organization.rawFilePath + '/' + moduleName
+                        }, organization);
+                        return module;
+                    });
+
+                    callback(err, moduleCollection);
                 });
-            });
-            logger.debug(fileNames);
-
-            var dirCollection = _.map(fileNames, function (fileName) {
-                var locationObject = _.defaults({
-                    name: fileName,
-                    type: subDirectory,
-                    extension: getExtension(fileName)
-                }, location);
-                locationObject.rawFilePath = convertLocationObjectToPath(locationObject);
-
-                return locationObject;
-            });
-
-            callback(err, dirCollection);
-        });
-    }
-
-    return new Promise(function (resolve, reject) {
-        fs.readdir(moduleDir.rootDir(), function (err, organizations) {
-            if (err) {
-                return reject(err);
             }
 
             function processModelsByModule(err, modelsArray) {
@@ -123,6 +78,7 @@ function getListByTypeAndName(subDirectory, fileNameMatch) {
                 var models = _.flatten(modelsArray);
                 logger.debug('DONE processModelsByModule', models);
 
+                console.info(models);
                 resolve(models);
             }
 
@@ -138,14 +94,40 @@ function getListByTypeAndName(subDirectory, fileNameMatch) {
             }
 
             logger.debug('found organizations', organizations);
-            async.map(organizations, getModulesByOrg, processModulesByOrg);
+
+            var organizationList = _.map(organizations, function (organizationName) {
+                return {
+                    organization: organizationName,
+                    /**
+                     * FILE or DB
+                     * @type {string}
+                     */
+                    storageType: 'FILE',
+                    rawFilePath: rootDir + '/' + organizationName
+                };
+            });
+
+            async.map(organizationList, getModules, processModulesByOrg);
+        };
+
+        var rootDir = './app';
+        fs.readdir(rootDir, function (err, directoryList) {
+            if (err) {
+                return reject(err);
+            }
+            readListOfOrganizations(rootDir, directoryList);
         });
     });
 }
 
 function getJsonFromFile(fileLocation) {
     return new Promise(function (resolve, reject) {
-        var file = convertLocationObjectToPath(fileLocation);
+        var file = fileLocation.rootDir + '/' +
+            fileLocation.organization + '/' +
+            fileLocation.module + '/' +
+            fileLocation.type + '/' +
+            fileLocation.name;
+
         logger.debug('getJsonFromFile ' + file);
         fs.readFile(file, 'utf8', function (err, data) {
             if (err) {
@@ -162,4 +144,3 @@ function getJsonFromFile(fileLocation) {
 
 exports.getListByTypeAndName = getListByTypeAndName;
 exports.getJsonFromFile = getJsonFromFile;
-exports.convertLocationObjectToPath = convertLocationObjectToPath;

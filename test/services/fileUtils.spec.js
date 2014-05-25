@@ -5,12 +5,6 @@ var service = require('../' + config.appRoot + 'app/services/fileUtils');
 var should = require('should');
 
 describe('File Utils Service', function () {
-    it('getPathToRawDirUsingFileSystem', function () {
-        should(service.getPathToRawDirUsingFileSystem('foo')).eql('./raw/foo/');
-    });
-    it('getPathToRawDirUsingRequire', function () {
-        should(service.getPathToRawDirUsingRequire('foo')).eql('../../raw/foo/');
-    });
     it('should find page in dir', function (done) {
         service.getListByTypeAndName('pages', 'TestUnit').should.eventually.eql([
             {
