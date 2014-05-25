@@ -5,7 +5,7 @@ var config = require('../config'),
 
 describe('Express App', function () {
 
-    it('GET model_data', function (done) {
+    it.skip('GET model_data', function (done) {
         // TODO - this isn't a unit test since it connects to DB
         request(config.app)
             .get('/data/ListTables')
