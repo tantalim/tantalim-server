@@ -12,6 +12,7 @@ function getExtension(filename) {
 }
 
 function getListByTypeAndName(rootDir, subDirectory, fileNameMatch) {
+    logger.info('starting getListByTypeAndName for %s %s %s', rootDir, subDirectory, fileNameMatch);
 
     return new Promise(function (resolve, reject) {
         var readListOfOrganizations = function (rootDir, organizations) {

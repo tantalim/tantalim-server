@@ -21,6 +21,24 @@ var setup = function (custom) {
         sessionCollection: 'sessions'
     };
     config = _.extend(defaultConfig, custom || {});
+
+    var Knex = require('knex');
+    Knex.knex = Knex.initialize({
+        client: 'mysql',
+        connection: {
+            host     : config.db.server,
+            user     : config.db.username,
+            password : config.db.password,
+            database : config.db.database,
+            charset  : 'utf8'
+        },
+        pool: {
+            max: 10
+        }
+    });
+
+    console.info(config.db);
+
 }
 
 /**

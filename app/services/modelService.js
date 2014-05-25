@@ -14,12 +14,11 @@ function getLocationByName(pageName) {
         if (results) {
             logger.debug('getBestResult');
             logger.debug(results);
-            if (results.databaseOptions && results.databaseOptions[0]) {
-                return results.databaseOptions[0];
-            }
-            if (results.fileOptions && results.fileOptions[0]) {
-                return results.fileOptions[0];
-            }
+            var bestTantalimOption = results.tantalimDir[0] || null;
+            var bestAppOption = results.appDir[0] || null;
+            var bestDatabaseOption = results.databaseOptions[0] || null;
+
+            return bestDatabaseOption || bestAppOption || bestTantalimOption;
         }
         return null;
     }
@@ -36,24 +35,37 @@ function getLocationByName(pageName) {
 
     return new Promise(function (resolve, reject) {
         async.parallel({
-            fileOptions: function (done) {
-                fileUtils.getListByTypeAndName('models', pageName).then(function (data) {
+            tantalimDir: function (done) {
+                var rootDir = './tantalim_modules';
+                fileUtils.getListByTypeAndName(rootDir, 'models', pageName).then(function (data) {
                     done(null, data);
                 }, function (err) {
+                    logger.error('tantalimDir');
+                    done(jsonUtils.error('fileOptions-Reject', err), null);
+                });
+            },
+            appDir: function (done) {
+                var rootDir = './app_modules';
+                fileUtils.getListByTypeAndName(rootDir, 'models', pageName).then(function (data) {
+                    done(null, data);
+                }, function (err) {
+                    logger.error('appDir');
                     done(jsonUtils.error('fileOptions-Reject', err), null);
                 });
             },
             databaseOptions: function (done) {
-                database.getModelLocation(pageName)
-                    .then(function (data) {
-                        done(null, convertDbToResults(data));
-                    }, function (err) {
-                        done(err, null);
-                    });
+                done(null, []);
+//                database.getModelLocation(pageName)
+//                    .then(function (data) {
+//                        done(null, convertDbToResults(data));
+//                    }, function (err) {
+//                        logger.error('databaseOptions');
+//                        done(err, null);
+//                    });
             }
         }, function (err, results) {
             if (err) {
-                reject(err);
+                return reject(err);
             }
 
             var bestOption = getBestResult(results);
