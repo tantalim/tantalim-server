@@ -36,9 +36,6 @@ var setup = function (custom) {
             max: 10
         }
     });
-
-    console.info(config.db);
-
 }
 
 /**
