@@ -116,7 +116,7 @@ var start = function () {
         }));
 
         // Dynamic helpers
-        app.use(helpers(config.app.name));
+//        app.use(helpers('Tantalim'));
 
         // Routes should be at the last
         app.use(app.router);

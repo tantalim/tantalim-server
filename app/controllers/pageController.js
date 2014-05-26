@@ -1,7 +1,5 @@
 'use strict';
 
-// TODO this whole page is still a mess. Need more unit tests.
-
 var service = require('../services/pageService'),
     modelService = require('../services/modelService'),
     logger = require('../logger/default').main;
@@ -22,6 +20,7 @@ exports.desktop = function (req, res) {
 exports.mobile = function (req, res) {
     // Get the real page title
     res.render('mobile', {
+        appName: 'Tantalim',
         pageName: req.pageName,
         title: req.pageName
     });
