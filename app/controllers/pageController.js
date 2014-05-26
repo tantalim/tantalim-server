@@ -62,17 +62,23 @@ exports.htmlBody = function (req, res) {
 };
 
 exports.mobileBody = function (req, res) {
-    function returnHttpResponse(pageResult) {
-        if (pageResult.error) {
-            res.render('page/error.html', pageResult.content);
-        } else if (pageResult.rawFilePath) {
-            res.sendfile(pageResult.rawFilePath);
-        } else {
-            res.render('page/mobile_list', pageResult.content);
-        }
-    }
+    service.getLocationByName(req.pageName)
+        .then(function (pageLocation) {
+            if (pageLocation.extension === 'html') {
+                return res.sendfile(pageLocation.rawFilePath);
+            }
 
-    return service.getPageByName(req.pageName).then(returnHttpResponse);
+            service.getDefinition(pageLocation)
+                .then(function (content) {
+                    logger.info(content);
+                    return res.render('page/mobileBody', content);
+                });
+        }, function (err) {
+            return res.render('page/error', err);
+        })
+        .catch(function (err) {
+            return res.render('page/error', err);
+        });
 };
 
 /**
