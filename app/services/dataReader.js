@@ -181,8 +181,7 @@ function addFilter(sql, modelDefinition, filter) {
 exports.addFilter = addFilter;
 
 function postQueryDataConversion(parent_rows, modelDefinition) {
-    console.info('postQueryDataConversion');
-    console.info(modelDefinition);
+    logger.debug('postQueryDataConversion');
     _.forEach(modelDefinition.fields, function(field) {
         if (field.dataType === 'Boolean') {
             _.forEach(parent_rows, function(row) {
