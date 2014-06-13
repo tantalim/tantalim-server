@@ -45,7 +45,7 @@ var setup = function (custom) {
 var start = function () {
     var app = express();
 
-    require('./app/routes/index')(app);
+//    require('./app/routes/index')(app);
 
     app.set('showStackError', true);
 
@@ -118,9 +118,6 @@ var start = function () {
         // Dynamic helpers
 //        app.use(helpers('Tantalim'));
 
-        // Routes should be at the last
-        app.use(app.router);
-
         // Setting the fav icon and static folder
         app.use(express.favicon());
         app.use(express.static(config.appRoot + '/public'));
@@ -148,6 +145,9 @@ var start = function () {
                 error: 'Not found'
             });
         });
+        // Routes should be at the last
+//        app.use(app.router);
+    require('./app/routes/index')(app);
 
     });
 
