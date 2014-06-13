@@ -118,6 +118,10 @@ var start = function () {
         // Dynamic helpers
 //        app.use(helpers('Tantalim'));
 
+        // Routes should be at the last
+        require('./app/routes/index')(app);
+        app.use(app.router);
+
         // Setting the fav icon and static folder
         app.use(express.favicon());
         app.use(express.static(config.appRoot + '/public'));
@@ -145,9 +149,6 @@ var start = function () {
                 error: 'Not found'
             });
         });
-        // Routes should be at the last
-//        app.use(app.router);
-    require('./app/routes/index')(app);
 
     });
 
