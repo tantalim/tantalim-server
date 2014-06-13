@@ -54,7 +54,7 @@ exports.save = function (req, res, callback) {
         var dataToSave = req.body;
         if (!dataToSave) {
             logger.error('no data to save');
-            logger.trace(req.body);
+            logger.debug(req.body);
             res.jsonp({error: 'no data to save'});
             return callback(res);
         }

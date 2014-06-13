@@ -29,7 +29,7 @@ exports.mobile = function (req, res) {
 exports.searchBody = function (req, res) {
     function returnHttpResponse(pageResult) {
         if (pageResult.error) {
-            res.render('page/error.html', pageResult.content);
+            res.render('page/htmlError.html', pageResult.content);
         } else if (pageResult.rawFilePath) {
             res.sendfile(pageResult.rawFilePath);
         } else {
@@ -53,10 +53,10 @@ exports.htmlBody = function (req, res) {
                     return res.render('page/htmlBody', content);
                 });
         }, function (err) {
-            return res.render('page/error', err);
+            return res.render('page/htmlError', err);
         })
         .catch(function (err) {
-            return res.render('page/error', err);
+            return res.render('page/htmlError', err);
         });
 };
 
@@ -73,10 +73,10 @@ exports.mobileBody = function (req, res) {
                     return res.render('page/mobileBody', content);
                 });
         }, function (err) {
-            return res.render('page/error', err);
+            return res.render('page/mobileError', err);
         })
         .catch(function (err) {
-            return res.render('page/error', err);
+            return res.render('page/mobileError', err);
         });
 };
 
