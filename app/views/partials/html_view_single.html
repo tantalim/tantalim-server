@@ -10,17 +10,14 @@
     {{/fieldType}}
     {{#fieldType fieldType 'select'}}
         <label for="{{../../modelName}}-{{fieldName}}">{{fieldLabel}}</label>
-        <ui-select ng-model="current.instances.{{../../modelName}}.data.{{fieldName}}"
-                   tnt-model="current.instances.{{../../modelName}}"
-                   tnt-copy="{{json this.select.copy}}"
-                   id="{{../../modelName}}-{{fieldName}}">
-            <match placeholder="Select..." />
-            <choices repeat="row in listSmartSelect.{{select.model}}"
-                     refresh="runSmartSelect('{{this.select.model}}', '{{../../modelName}}', $select.search)"
-                     refresh-delay="0">
-                <div ng-bind-html="row.data.{{select.display}} | highlight: $select.search"></div>
-            </choices>
-        </ui-select>
+        <ui-select
+                item-model="{{select.model}}"
+                item-value="{{select.sourceValue}}"
+                instance-model="{{../../modelName}}"
+                instance-key="{{select.targetID}}"
+                instance-value="{{fieldName}}"
+                other-mappings="{{json this.select.otherMappings}}"
+                ></ui-select>
     {{/fieldType}}
     {{#fieldType fieldType 'checkbox'}}
         <div class="checkbox">
