@@ -15,4 +15,7 @@ $ npm link tantalim-server
 ```
 
 ## Continuous Integration
+
+[Travis CI](https://travis-ci.org/tantalim/tantalim-server)
+
 ![Travis CI Status](https://travis-ci.org/tantalim/tantalim-server.svg)
