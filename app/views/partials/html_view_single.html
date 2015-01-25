@@ -11,8 +11,10 @@
     {{#fieldType fieldType 'select'}}
         <label for="{{../../modelName}}-{{fieldName}}">{{fieldLabel}}</label>
         <ui-select
+                current="current.instances.{{../../modelName}}.data"
                 item-model="{{select.model}}"
                 item-value="{{select.sourceValue}}"
+                item-where="{{json select.where}}"
                 instance-model="{{../../modelName}}"
                 instance-key="{{select.targetID}}"
                 instance-value="{{fieldName}}"

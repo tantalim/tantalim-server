@@ -34,7 +34,7 @@ exports.query = function (req, res, callback) {
     };
 
     getModel(req.pageName, res, function (modelDefinition) {
-        reader.getData(modelDefinition, req.params.query, function (data, err) {
+        reader.getData(modelDefinition, req.params.query, req.query, function (data, err) {
             if (err) {
                 return errorFullResponse(res, err);
             }

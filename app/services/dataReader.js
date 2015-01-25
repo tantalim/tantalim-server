@@ -135,7 +135,7 @@ exports.getModelSql = function (md, parentModel, parentData) {
 
         if (!childStep) {
             throw new Error('Could not find valid stepID ' + md.data.parent_stepID +
-                ' to link child ' + md.data.modelName + ' to parent');
+            ' to link child ' + md.data.modelName + ' to parent');
         }
 
         var parentPrimaryKeyAkaToColumn = exports.getParentFieldByChildStep(parentModel.fields, childStep.joinColumns);
@@ -162,44 +162,71 @@ exports.getModelSql = function (md, parentModel, parentData) {
     return sql;
 };
 
-function addFilter(sql, modelDefinition, filter) {
-    if (_.isEmpty(filter)) {
+function getFieldSql(field) {
+    return getTableAlias(field.fieldStepID) + field.basisColumn.dbName;
+}
+
+function addDefaultFilter(sql, modelDefinition, filterValue) {
+    if (_.isEmpty(filterValue)) {
         return;
     }
 
-    if (modelDefinition.defaultFilter) {
-        var primaryFilterField = modelDefinition.defaultFilter.basisColumn.dbName;
-
-        primaryFilterField = getTableAlias(modelDefinition.defaultFilter.fieldStepID) + primaryFilterField;
-        // TODO Test SQL Injection here
-        sql.where(primaryFilterField, 'like', '%' + filter + '%');
-
-        logger.debug('Added runtime filter');
-        logger.debug(sql.toSql());
+    if (!modelDefinition.defaultFilter) {
+        logger.error('default filter value is used but no default filter is defined in Model: ' + modelDefinition);
+        return;
     }
+
+    var primaryFilterField = getFieldSql(modelDefinition.defaultFilter);
+    // TODO Test SQL Injection here
+    sql.where(primaryFilterField, 'like', '%' + filterValue + '%');
+
+    logger.debug('Added runtime filterValue');
+    logger.debug(sql.toSql());
 }
-exports.addFilter = addFilter;
+//exports.addFilter = addDefaultFilter;
+
+function findField(modelDefinition, fieldName) {
+    return _.find(modelDefinition.fields, function(field) {
+        if (field.fieldName == fieldName) {
+            return field;
+        }
+    });
+}
+
+function addAdvancedWhereClauses(sql, modelDefinition, advancedWhereClauses) {
+    if (_.isEmpty(advancedWhereClauses)) {
+        return;
+    }
+    _.keys(advancedWhereClauses).forEach(function (fieldName) {
+        var field = findField(modelDefinition, fieldName);
+        var fieldSql = getFieldSql(field);
+        sql.where(fieldSql, '=', advancedWhereClauses[fieldName]);
+    });
+}
 
 function postQueryDataConversion(parent_rows, modelDefinition) {
     logger.debug('postQueryDataConversion');
-    _.forEach(modelDefinition.fields, function(field) {
+    _.forEach(modelDefinition.fields, function (field) {
         if (field.dataType === 'Boolean') {
-            _.forEach(parent_rows, function(row) {
+            _.forEach(parent_rows, function (row) {
                 row[field.fieldName] = !(!row[field.fieldName]);
             });
         }
     });
 }
 
-exports.getData = function (modelDefinition, filter, callback) {
-    filter = filter ? filter : {};
+exports.getData = function (modelDefinition, defaultFilterValue, advancedWhereClauses, callback) {
+    defaultFilterValue = defaultFilterValue ? defaultFilterValue : {};
+    advancedWhereClauses = advancedWhereClauses ? advancedWhereClauses : [];
 
     logger.debug('starting getData');
-    logger.debug('filter = ', filter);
+    logger.debug('defaultFilterValue = ', defaultFilterValue);
+    logger.debug('advancedWhereClauses = ', advancedWhereClauses);
 
     var modelSql = exports.getModelSql(modelDefinition);
 
-    addFilter(modelSql, modelDefinition, filter);
+    addDefaultFilter(modelSql, modelDefinition, defaultFilterValue);
+    addAdvancedWhereClauses(modelSql, modelDefinition, advancedWhereClauses);
 
     modelSql.then(function (parent_rows) {
         postQueryDataConversion(parent_rows, modelDefinition);
