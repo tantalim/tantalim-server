@@ -13,3 +13,6 @@ $ cd ../sample-app
 # Create shortcut to tantalim-server
 $ npm link tantalim-server
 ```
+
+## Continuous Integration
+![Travis CI Status](https://travis-ci.org/tantalim/tantalim-server.svg)
