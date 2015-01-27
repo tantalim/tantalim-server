@@ -24,7 +24,7 @@ xdescribe('Model Saver', function () {
         knexProxy.knex.client = {};
 
         this.modelDefinition = {
-            data: { modelName: 'UnitTestModel' },
+            data: {modelName: 'UnitTestModel'},
             basisTable: {
                 tableName: 'TestUnit',
                 dbName: 'test_unit',
@@ -69,11 +69,11 @@ xdescribe('Model Saver', function () {
         });
 
         var dataToSave = [
-            { state: 'INSERTED', data: { TestName: 'Foo' }, tempID: 'ASDF1234' }
+            {state: 'INSERTED', data: {TestName: 'Foo'}, tempID: 'ASDF1234'}
         ];
 
         var expected = [
-            { data: { TestName: 'Foo', TestID: _fakeID }, id: _fakeID, tempID: 'ASDF1234' }
+            {data: {TestName: 'Foo', TestID: _fakeID}, id: _fakeID, tempID: 'ASDF1234'}
         ];
 
         return saver.save(this.modelDefinition, dataToSave).should.eventually.eql(expected);
@@ -81,7 +81,7 @@ xdescribe('Model Saver', function () {
 
     it('should delete one row', function () {
         var dataToSave = [
-            { state: 'DELETED', id: 1 }
+            {state: 'DELETED', id: 1}
         ];
 
         var expected = [
@@ -108,8 +108,8 @@ xdescribe('Model Saver', function () {
         });
 
         var dataToSave = [
-            { state: 'DELETED', id: 1 },
-            { state: 'DELETED', id: 2 }
+            {state: 'DELETED', id: 1},
+            {state: 'DELETED', id: 2}
         ];
 
         var expected = [
@@ -128,15 +128,15 @@ xdescribe('Model Saver', function () {
         });
 
         var dataToSave = [
-            { state: 'INSERTED', data: { TestName: 'Foo' } },
-            { state: 'INSERTED', data: { TestName: 'Bar' } },
-            { state: 'INSERTED', data: { TestName: 'Baz' } }
+            {state: 'INSERTED', data: {TestName: 'Foo'}},
+            {state: 'INSERTED', data: {TestName: 'Bar'}},
+            {state: 'INSERTED', data: {TestName: 'Baz'}}
         ];
 
         var expected = [
-            { data: { TestName: 'Foo', TestID: 1 }, id: 1 },
-            { data: { TestName: 'Bar', TestID: 2 }, id: 2 },
-            { data: { TestName: 'Baz', TestID: 3 }, id: 3 }
+            {data: {TestName: 'Foo', TestID: 1}, id: 1},
+            {data: {TestName: 'Bar', TestID: 2}, id: 2},
+            {data: {TestName: 'Baz', TestID: 3}, id: 3}
         ];
 
         return saver.save(this.modelDefinition, dataToSave).should.eventually.eql(expected);
@@ -144,11 +144,11 @@ xdescribe('Model Saver', function () {
 
     it('should update one row', function () {
         var dataToSave = [
-            { state: 'UPDATED', id: 1, data: { TestName: 'Bar', TestID: 1 } }
+            {state: 'UPDATED', id: 1, data: {TestName: 'Bar', TestID: 1}}
         ];
 
         var expected = [
-            { id: 1, data: { TestName: 'Bar', TestID: 1 } }
+            {id: 1, data: {TestName: 'Bar', TestID: 1}}
         ];
 
         knexProxy.knex.client.query = Promise.method(function (builder) {
@@ -172,11 +172,10 @@ xdescribe('Model Saver', function () {
             fieldStep: 1
         });
 
-        this.modelDefinition.fieldSteps.push({
-        });
+        this.modelDefinition.fieldSteps.push({});
 
         var dataToSave = [
-            { state: 'UPDATED', id: 1, data: { TestName: 'ChildName', TestID: 1, ParentTestName: 'ParentName' } }
+            {state: 'UPDATED', id: 1, data: {TestName: 'ChildName', TestID: 1, ParentTestName: 'ParentName'}}
         ];
 
         knexProxy.knex.client.query = Promise.method(function (builder) {
@@ -204,11 +203,11 @@ xdescribe('Model Saver', function () {
         });
 
         var dataToSave = [
-            { state: 'INSERTED', data: { TestName: 'Foo' }, tempID: 'ASDF1234' }
+            {state: 'INSERTED', data: {TestName: 'Foo'}, tempID: 'ASDF1234'}
         ];
 
         var expected = [
-            { data: { TestName: 'Foo', TestID: 'ASDF1234' }, id: 'ASDF1234', tempID: 'ASDF1234' }
+            {data: {TestName: 'Foo', TestID: 'ASDF1234'}, id: 'ASDF1234', tempID: 'ASDF1234'}
         ];
 
         return saver.save(this.modelDefinition, dataToSave).should.eventually.eql(expected);
