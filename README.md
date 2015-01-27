@@ -18,3 +18,4 @@ $ npm link tantalim-server
 
 [![Travis CI](https://travis-ci.org/tantalim/tantalim-server.svg)](https://travis-ci.org/tantalim/tantalim-server)
 [![Circle CI](https://circleci.com/gh/tantalim/tantalim-server.svg?style=svg)](https://circleci.com/gh/tantalim/tantalim-server)
+[![Dependency Status](https://david-dm.org/tantalim/tantalim-server.svg)](https://david-dm.org/tantalim/tantalim-server)
