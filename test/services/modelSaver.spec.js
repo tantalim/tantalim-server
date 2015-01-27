@@ -4,24 +4,21 @@ var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
     Promise = require('bluebird'),
-    knexProxy = {knex: {}},
     tableServiceProxy = {},
-    chai = require('chai');
+    chai = require('chai'),
+    client;
 
 chai.Should();
 chai.use(require('chai-as-promised'));
 
-// TODO fix unit tests
-xdescribe('Model Saver', function () {
+describe('Model Saver', function () {
     var saver;
 
     beforeEach(function () {
+        client = config.knex().client;
         saver = proxyquire(configAppRoot + 'services/modelSaver', {
-            'knex': knexProxy,
             './tableService': tableServiceProxy
         });
-        knexProxy.knex = {};
-        knexProxy.knex.client = {};
 
         this.modelDefinition = {
             data: {modelName: 'UnitTestModel'},
@@ -50,6 +47,7 @@ xdescribe('Model Saver', function () {
         };
     });
 
+
     it('should return empty data', function () {
         var dataToSave = [];
         return saver.save(this.modelDefinition, []).should.eventually.eql(dataToSave);
@@ -57,7 +55,7 @@ xdescribe('Model Saver', function () {
 
     it('should insert one row', function () {
         var _fakeID = 1;
-        knexProxy.knex.client.query = Promise.method(function (builder) {
+        client.query = Promise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -88,7 +86,7 @@ xdescribe('Model Saver', function () {
             {id: 1}
         ];
 
-        knexProxy.knex.client.query = Promise.method(function (builder) {
+        client.query = Promise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -103,7 +101,7 @@ xdescribe('Model Saver', function () {
     });
 
     it('should delete two rows', function () {
-        knexProxy.knex.client.query = Promise.method(function () {
+        client.query = Promise.method(function () {
             return 1;
         });
 
@@ -122,7 +120,7 @@ xdescribe('Model Saver', function () {
 
     it('should insert three rows', function () {
         var _counter = 0;
-        knexProxy.knex.client.query = Promise.method(function () {
+        client.query = Promise.method(function () {
             _counter++;
             return [_counter];
         });
@@ -151,7 +149,7 @@ xdescribe('Model Saver', function () {
             {id: 1, data: {TestName: 'Bar', TestID: 1}}
         ];
 
-        knexProxy.knex.client.query = Promise.method(function (builder) {
+        client.query = Promise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -178,7 +176,7 @@ xdescribe('Model Saver', function () {
             {state: 'UPDATED', id: 1, data: {TestName: 'ChildName', TestID: 1, ParentTestName: 'ParentName'}}
         ];
 
-        knexProxy.knex.client.query = Promise.method(function (builder) {
+        client.query = Promise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -195,7 +193,7 @@ xdescribe('Model Saver', function () {
     it('should insert one row', function () {
         this.modelDefinition.fields[0].basisColumn.columnDefault = 'GUID';
 
-        knexProxy.knex.client.query = Promise.method(function (builder) {
+        client.query = Promise.method(function (builder) {
             var sql = builder.toSql(builder);
             var expectedSql = 'insert into `test_unit` (`id`, `name`) values (?, ?)';
             chai.assert.equal(sql, expectedSql);
