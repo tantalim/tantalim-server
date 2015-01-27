@@ -1,12 +1,12 @@
 'use strict';
 
-var _ = require('lodash'),
-    async = require('async'),
+var async = require('async'),
+    //_ = require('lodash'),
     Promise = require('bluebird'),
     fileUtils = require('./fileUtils'),
     jsonUtils = require('./jsonUtils'),
-    logger = require('../logger/default').main,
-    database = require('./db/modelDatabaseService');
+    //database = require('./db/modelDatabaseService'),
+    logger = require('../logger/default').main;
 
 function getLocationByName(pageName) {
 
@@ -23,15 +23,15 @@ function getLocationByName(pageName) {
         return null;
     }
 
-    function convertDbToResults(data) {
-        logger.debug('convertDbToResults');
-        return _.map(data, function (db) {
-            return _.defaults(db, {
-                    storageType: 'DATABASE'
-                }
-            );
-        });
-    }
+    //function convertDbToResults(data) {
+    //    logger.debug('convertDbToResults');
+    //    return _.map(data, function (db) {
+    //        return _.defaults(db, {
+    //                storageType: 'DATABASE'
+    //            }
+    //        );
+    //    });
+    //}
 
     return new Promise(function (resolve, reject) {
         async.parallel({

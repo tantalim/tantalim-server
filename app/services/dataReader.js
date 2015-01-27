@@ -187,7 +187,7 @@ function addDefaultFilter(sql, modelDefinition, filterValue) {
 
 function findField(modelDefinition, fieldName) {
     return _.find(modelDefinition.fields, function(field) {
-        if (field.fieldName == fieldName) {
+        if (field.fieldName === fieldName) {
             return field;
         }
     });
