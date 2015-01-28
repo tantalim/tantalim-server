@@ -71,7 +71,7 @@ var start = function () {
     }
 
     // Create `ExpressHandlebars` instance with a default layout.
-    var exphbs = require('express3-handlebars');
+    var exphbs = require('express-handlebars');
     var hbs = exphbs.create({
 //        defaultLayout: 'main',
         helpers: require('./app/services/handlebarHelpers'),
