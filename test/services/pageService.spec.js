@@ -3,7 +3,7 @@
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
     fileUtils = {},
     chai = require('chai');
 
@@ -27,7 +27,7 @@ describe('Page service', function () {
         });
 
         it('should not find the file', function (done) {
-            fileUtils.getListByTypeAndName = Promise.method(function () {
+            fileUtils.getListByTypeAndName = BluebirdPromise.method(function () {
                 return [];
             });
 
@@ -42,7 +42,7 @@ describe('Page service', function () {
         });
 
         it('should find the page file', function (done) {
-            fileUtils.getListByTypeAndName = Promise.method(function () {
+            fileUtils.getListByTypeAndName = BluebirdPromise.method(function () {
                 return [
                     {
                         name: 'PageFile',

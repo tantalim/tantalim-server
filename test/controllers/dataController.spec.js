@@ -3,7 +3,7 @@
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
     sinon = require('sinon');
 //    async = require('async'),
 //    should = require('should')
@@ -41,7 +41,7 @@ describe('Data Controller', function () {
 //                        }
 //                        return data;
 //                    }
-                    return Promise.resolve(data);
+                    return BluebirdPromise.resolve(data);
                 }
             };
 

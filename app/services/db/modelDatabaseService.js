@@ -3,7 +3,7 @@
 var _ = require('lodash'),
     async = require('async'),
 //    jsonUtils = require('../jsonUtils'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
     logger = require('../../logger/default').main,
     sqlLogger = require('../../logger/default').sql,
     dao = require('./modelDao');
@@ -46,7 +46,7 @@ function toWhere(fullModelName) {
 }
 
 function getModelLocation(modelName) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         var names = toWhere(modelName);
         var modelByNameSql = dao.getModelByNameSql(names.model, names.application);
         sqlLogger.verbose(modelByNameSql.toSql());
@@ -74,7 +74,7 @@ function getModelLocation(modelName) {
 }
 
 function getModelByName(modelName) {
-    return new Promise(function (resolveGetModelByName, rejectGetModelByName) {
+    return new BluebirdPromise(function (resolveGetModelByName, rejectGetModelByName) {
         logger.debug('starting modelService.getModelByName for ', modelName);
         var names = toWhere(modelName);
 

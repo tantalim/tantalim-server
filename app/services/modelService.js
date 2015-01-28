@@ -2,7 +2,7 @@
 
 var async = require('async'),
     //_ = require('lodash'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
     fileUtils = require('./fileUtils'),
     jsonUtils = require('./jsonUtils'),
     //database = require('./db/modelDatabaseService'),
@@ -33,7 +33,7 @@ function getLocationByName(pageName) {
     //    });
     //}
 
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         async.parallel({
             tantalimDir: function (done) {
                 var rootDir = './tantalim_modules';
@@ -78,7 +78,7 @@ function getLocationByName(pageName) {
 }
 
 function getDefinition(location) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         if (location.extension === 'json') {
             fileUtils.getJsonFromFile(location)
                 .then(function (content) {

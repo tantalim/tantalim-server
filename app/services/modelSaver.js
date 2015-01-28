@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('lodash'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
     knex = require('knex').knex,
     logger = require('../logger/default').main,
     sqlLogger = require('../logger/default').sql,
@@ -48,7 +48,7 @@ function getColumnHardDefaultOnInsert(field, row) {
 }
 
 function childUpdate(modelDefinition, row) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting childUpdate() for ', modelDefinition.data.modelName);
 
         if (!modelDefinition.children) {
@@ -80,7 +80,7 @@ function childUpdate(modelDefinition, row) {
 }
 
 function insertData(modelDefinition, row) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting insertData() for ', modelDefinition.data.modelName);
 
         var primaryKey = modelDefinition.basisTable.primaryKey;
@@ -119,7 +119,7 @@ function insertData(modelDefinition, row) {
 }
 
 function updateData(modelDefinition, row) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting updateData() for ', modelDefinition.data.modelName);
 
         function included(field) {
@@ -197,7 +197,7 @@ function updateData(modelDefinition, row) {
 }
 
 function deleteData(modelDefinition, row) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting deleteData() for ', modelDefinition.data.modelName);
 
         var primaryKey = modelDefinition.basisTable.primaryKey;
@@ -239,7 +239,7 @@ function saveSingleRow(modelDefinition, row) {
 }
 
 exports.save = function (modelDefinition, data) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting modelSaver.save() on %s', modelDefinition.data.modelName);
 //        logger.debug(data);
 

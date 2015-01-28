@@ -5,7 +5,7 @@ var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
     sinon = require('sinon'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
     pageService = {},
     modelService = {},
     chai = require('chai');
@@ -17,7 +17,7 @@ describe('Page Controller', function () {
 
     describe('promises', function () {
         function testPromise(id) {
-            return new Promise(function (resolve, reject) {
+            return new BluebirdPromise(function (resolve, reject) {
                 console.info('test ' + id);
                 if (id > 3) {
                     reject('higher than 2');
@@ -70,7 +70,7 @@ describe('Page Controller', function () {
 
         it('should send raw file', function (done) {
             var rawFilePath = './raw/file';
-            pageService.getLocationByName = Promise.method(function () {
+            pageService.getLocationByName = BluebirdPromise.method(function () {
                 return {
                     extension: 'js',
                     rawFilePath: rawFilePath
@@ -85,7 +85,7 @@ describe('Page Controller', function () {
         it('should render error page', function (done) {
             var err = 'something "correctly" went wrong';
             pageService.getLocationByName = function () {
-                return new Promise(function (resolve, reject) {
+                return new BluebirdPromise(function (resolve, reject) {
                     reject(err);
                 });
             };
@@ -102,20 +102,20 @@ describe('Page Controller', function () {
             var modelDefinition = {
                 id: 'TestModel'
             };
-            pageService.getLocationByName = Promise.method(function () {
+            pageService.getLocationByName = BluebirdPromise.method(function () {
                 return {
                     extension: 'json'
                 };
             });
-            pageService.getDefinition = Promise.method(function () {
+            pageService.getDefinition = BluebirdPromise.method(function () {
                 return pageDefinition;
             });
-            modelService.getLocationByName = Promise.method(function () {
+            modelService.getLocationByName = BluebirdPromise.method(function () {
                 return {
                     extension: 'json'
                 };
             });
-            modelService.getDefinition = Promise.method(function () {
+            modelService.getDefinition = BluebirdPromise.method(function () {
                 return modelDefinition;
             });
 

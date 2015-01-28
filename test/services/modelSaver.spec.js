@@ -3,7 +3,7 @@
 var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
     tableServiceProxy = {},
     chai = require('chai'),
     client = config.knex().client;
@@ -54,7 +54,7 @@ describe('Model Saver', function () {
 
     it('should insert one row', function () {
         var _fakeID = 1;
-        client.query = Promise.method(function (builder) {
+        client.query = BluebirdPromise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -85,7 +85,7 @@ describe('Model Saver', function () {
             {id: 1}
         ];
 
-        client.query = Promise.method(function (builder) {
+        client.query = BluebirdPromise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -100,7 +100,7 @@ describe('Model Saver', function () {
     });
 
     it('should delete two rows', function () {
-        client.query = Promise.method(function () {
+        client.query = BluebirdPromise.method(function () {
             return 1;
         });
 
@@ -119,7 +119,7 @@ describe('Model Saver', function () {
 
     it('should insert three rows', function () {
         var _counter = 0;
-        client.query = Promise.method(function () {
+        client.query = BluebirdPromise.method(function () {
             _counter++;
             return [_counter];
         });
@@ -148,7 +148,7 @@ describe('Model Saver', function () {
             {id: 1, data: {TestName: 'Bar', TestID: 1}}
         ];
 
-        client.query = Promise.method(function (builder) {
+        client.query = BluebirdPromise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -175,7 +175,7 @@ describe('Model Saver', function () {
             {state: 'UPDATED', id: 1, data: {TestName: 'ChildName', TestID: 1, ParentTestName: 'ParentName'}}
         ];
 
-        client.query = Promise.method(function (builder) {
+        client.query = BluebirdPromise.method(function (builder) {
             var sql = builder.toSql(builder);
             var bindings = builder.getBindings();
 
@@ -192,7 +192,7 @@ describe('Model Saver', function () {
     it('should insert one row', function () {
         this.modelDefinition.fields[0].basisColumn.columnDefault = 'GUID';
 
-        client.query = Promise.method(function (builder) {
+        client.query = BluebirdPromise.method(function (builder) {
             var sql = builder.toSql(builder);
             var expectedSql = 'insert into `test_unit` (`id`, `name`) values (?, ?)';
             chai.assert.equal(sql, expectedSql);

@@ -1,6 +1,6 @@
 'use strict';
 
-var Promise = require('bluebird'),
+var BluebirdPromise = require('bluebird'),
     logger = require('../logger/default').main,
     async = require('async'),
     _ = require('lodash'),
@@ -14,7 +14,7 @@ function getExtension(filename) {
 function getListByTypeAndName(rootDir, subDirectory, fileNameMatch) {
     logger.info('starting getListByTypeAndName for %s %s %s', rootDir, subDirectory, fileNameMatch);
 
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         var readListOfOrganizations = function (rootDir, organizations) {
             function getSubDirByModule(module, callback) {
                 var path = module.rawFilePath + '/' + subDirectory;
@@ -119,7 +119,7 @@ function getListByTypeAndName(rootDir, subDirectory, fileNameMatch) {
 }
 
 function getJsonFromFile(fileLocation) {
-    return new Promise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, reject) {
         var file = fileLocation.rawFilePath;
 
         logger.debug('getJsonFromFile ' + file);

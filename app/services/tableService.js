@@ -1,9 +1,9 @@
 'use strict';
 
-var Promise = require('bluebird');
+var BluebirdPromise = require('bluebird');
 
 exports.getTableById = function (tableID) {
-    return new Promise(function (resolve) {
+    return new BluebirdPromise(function (resolve) {
         var table = {
             columns: []
         };

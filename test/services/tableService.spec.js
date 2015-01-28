@@ -4,12 +4,12 @@ var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
 //    sinon = require('sinon'),
-    Promise = require('bluebird'),
+    BluebirdPromise = require('bluebird'),
 //    knex = require('knex').knex,
     knexProxy = {},
     chai = require('chai');
 
-Promise.longStackTraces();
+BluebirdPromise.longStackTraces();
 chai.Should();
 chai.use(require('chai-as-promised'));
 
