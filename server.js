@@ -2,7 +2,13 @@
 
 var _ = require('lodash'),
     express = require('express'),
-    helpers = require('view-helpers');
+    helpers = require('view-helpers'),
+    compression = require('compression'),
+    cookieParser = require('cookie-parser'),
+    cookieSession = require('cookie-session'),
+    bodyParser = require('body-parser'),
+    methodOverride = require('method-override'),
+    morgan = require('morgan');
 
 var path = require('path');
 var rootPath = path.normalize(__dirname);
@@ -54,9 +60,10 @@ var start = function () {
     // cache=memory or swig dies in NODE_ENV=production
     app.locals.cache = 'memory';
 
+    // Using compression needs more load testing to ensure the settings are valid for Tantalim
     // Should be placed before express.static
     // To ensure that all assets and data are compressed (utilize bandwidth)
-    app.use(express.compress({
+    app.use(compression({
         filter: function (req, res) {
             return (/json|text|javascript|css/).test(res.getHeader('Content-Type'));
         },
@@ -67,7 +74,7 @@ var start = function () {
 
     // Only use logger for development environment
     if (config.environment === 'development') {
-        app.use(express.logger('dev'));
+        app.use(morgan('combined'));
     }
 
     // Create `ExpressHandlebars` instance with a default layout.
@@ -100,56 +107,52 @@ var start = function () {
     // Enable jsonp
     app.enable('jsonp callback');
 
-    app.configure(function () {
-        // The cookieParser should be above session
-        app.use(express.cookieParser());
+    // The cookieParser should be above session
+    app.use(cookieParser);
 
-        // Request body parsing middleware should be above methodOverride
-        app.use(express.urlencoded());
-        app.use(express.json());
-        app.use(express.methodOverride());
+    // Request body parsing middleware should be above methodOverride
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    app.use(methodOverride());
 
-        // Express/Mongo session storage
-        app.use(express.cookieSession({
-            key: 'app.sess',
-            secret: config.sessionSecret
-        }));
+    // Express/Mongo session storage
+    app.use(cookieSession({
+        key: 'app.sess',
+        secret: config.sessionSecret
+    }));
 
-        // Dynamic helpers
+    // Dynamic helpers
 //        app.use(helpers('Tantalim'));
 
-        // Routes should be at the last
-        require('./app/routes/index')(app);
-        app.use(app.router);
+    // Routes should be at the last
+    require('./app/routes/index')(app);
 
-        // Setting the fav icon and static folder
-        app.use(express.favicon());
-        app.use(express.static(config.appRoot + '/public'));
+    // Setting the fav icon and static folder
+    //app.use(express.favicon());
+    app.use(express.static(config.appRoot + '/public'));
 
-        // Assume "not found" in the error msgs is a 404. this is somewhat
-        // silly, but valid, you can do whatever you like, set properties,
-        // use instanceof etc.
-        app.use(function (err, req, res, next) {
-            // Treat as 404
-            if (~err.message.indexOf('not found')) return next();
+    // Assume "not found" in the error msgs is a 404. this is somewhat
+    // silly, but valid, you can do whatever you like, set properties,
+    // use instanceof etc.
+    app.use(function (err, req, res, next) {
+        // Treat as 404
+        if (~err.message.indexOf('not found')) return next();
 
-            // Log it
-            console.error(err.stack);
+        // Log it
+        console.error(err.stack);
 
-            // Error page
-            res.status(500).render('500', {
-                error: err.stack
-            });
+        // Error page
+        res.status(500).render('500', {
+            error: err.stack
         });
+    });
 
-        // Assume 404 since no middleware responded
-        app.use(function (req, res) {
-            res.status(404).render('404', {
-                url: req.originalUrl,
-                error: 'Not found'
-            });
+    // Assume 404 since no middleware responded
+    app.use(function (req, res) {
+        res.status(404).render('404', {
+            url: req.originalUrl,
+            error: 'Not found'
         });
-
     });
 
     var server = app.listen(config.port, function () {
