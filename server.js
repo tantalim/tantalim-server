@@ -51,8 +51,6 @@ var setup = function (custom) {
 var start = function () {
     var app = express();
 
-//    require('./app/routes/index')(app);
-
     app.set('showStackError', true);
 
     // Prettify HTML
@@ -108,14 +106,14 @@ var start = function () {
     app.enable('jsonp callback');
 
     // The cookieParser should be above session
-    app.use(cookieParser);
+    app.use(cookieParser());
 
     // Request body parsing middleware should be above methodOverride
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.use(methodOverride());
 
-    // Express/Mongo session storage
+    // Express session storage
     app.use(cookieSession({
         key: 'app.sess',
         secret: config.sessionSecret
