@@ -1,11 +1,19 @@
 'use strict';
 
-var config = require('../config');
+var config = require('../config'),
+    BluebirdPromise = require('bluebird'),
+    should = require('should'),
+    client = config.knex().client,
+    chai = require('chai')
+    ;
+
+chai.Should();
+chai.use(require('chai-as-promised'));
+
 var service = require('../' + config.appRoot + 'app/services/dataReader');
-var should = require('should');
 
 describe('Data Reader Service', function () {
-    describe.skip('getModelSql', function () {
+    describe('getModelSql', function () {
         // TODO Mock the knex module inside dataReader service
         it('should select person', function () {
             var model = {
@@ -219,6 +227,23 @@ describe('Data Reader Service', function () {
             ];
             var results = service.addKeysToData(testData, 'id', 'foreignKey');
             should(results[0].foreignKey).eql('2');
+        });
+    });
+    describe('getData', function() {
+        var model = {
+            basisTable: { dbName: 'person'}
+        };
+        it('should error', function () {
+            client.query = BluebirdPromise.method(function () {
+                throw 'test error';
+            });
+            return service.getData(model).should.eventually.be.rejected;
+        });
+        it('should query', function () {
+            client.query = BluebirdPromise.method(function () {
+                return [];
+            });
+            service.getData(model);
         });
     });
 });

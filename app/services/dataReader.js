@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('lodash'),
+    BluebirdPromise = require('bluebird'),
     async = require('async'),
     logger = require('../logger/default').main,
     knex = require('knex').knex;
@@ -215,58 +216,59 @@ function postQueryDataConversion(parent_rows, modelDefinition) {
     });
 }
 
-exports.getData = function (modelDefinition, defaultFilterValue, advancedWhereClauses, callback) {
-    defaultFilterValue = defaultFilterValue ? defaultFilterValue : {};
-    advancedWhereClauses = advancedWhereClauses ? advancedWhereClauses : [];
+exports.getData = function (modelDefinition, defaultFilterValue, advancedWhereClauses) {
+    return new BluebirdPromise(function (resolve, reject) {
+        defaultFilterValue = defaultFilterValue ? defaultFilterValue : {};
+        advancedWhereClauses = advancedWhereClauses ? advancedWhereClauses : [];
 
-    logger.debug('starting getData');
-    logger.debug('defaultFilterValue = ', defaultFilterValue);
-    logger.debug('advancedWhereClauses = ', advancedWhereClauses);
+        logger.debug('starting getData');
+        logger.debug('defaultFilterValue = ', defaultFilterValue);
+        logger.debug('advancedWhereClauses = ', advancedWhereClauses);
 
-    var modelSql = exports.getModelSql(modelDefinition);
+        var modelSql = exports.getModelSql(modelDefinition);
 
-    addDefaultFilter(modelSql, modelDefinition, defaultFilterValue);
-    addAdvancedWhereClauses(modelSql, modelDefinition, advancedWhereClauses);
+        addDefaultFilter(modelSql, modelDefinition, defaultFilterValue);
+        addAdvancedWhereClauses(modelSql, modelDefinition, advancedWhereClauses);
 
-    modelSql.then(function (parent_rows) {
-        postQueryDataConversion(parent_rows, modelDefinition);
-        var parentRowsWithKeys = exports.addKeysToData(parent_rows, modelDefinition.primaryKey);
-        if (modelDefinition.children && modelDefinition.children.length > 0) {
-            var readChildModel = function (nextModel, childModelDone) {
-                if (!nextModel.data) {
-                    callback(parentRowsWithKeys);
-                }
-                var sqlColumns;
-                try {
-                    sqlColumns = exports.getModelSql(nextModel, modelDefinition, parent_rows);
-                } catch (err) {
-                    logger.error('failed to read data 1', err);
-                    callback(null, err);
-                }
-                sqlColumns.then(function (child_rows) {
-                    postQueryDataConversion(child_rows, nextModel);
-                    var childRowsWithKeys = exports.addKeysToData(child_rows, nextModel.primaryKey, nextModel.foreignKey);
-                    exports.addChildrenToParent(parentRowsWithKeys, nextModel.data.modelName, childRowsWithKeys);
-                    childModelDone();
-                }, function (err) {
-                    logger.error('failed to read data 2', err);
-                    callback(null, err);
+        modelSql.then(function (parent_rows) {
+            postQueryDataConversion(parent_rows, modelDefinition);
+            var parentRowsWithKeys = exports.addKeysToData(parent_rows, modelDefinition.primaryKey);
+            if (modelDefinition.children && modelDefinition.children.length > 0) {
+                var readChildModel = function (nextModel, childModelDone) {
+                    if (!nextModel.data) {
+                        resolve(parentRowsWithKeys);
+                    }
+                    var sqlColumns;
+                    try {
+                        sqlColumns = exports.getModelSql(nextModel, modelDefinition, parent_rows);
+                    } catch (err) {
+                        logger.error('failed to read data 1', err);
+                        reject(err);
+                    }
+                    sqlColumns.then(function (child_rows) {
+                        postQueryDataConversion(child_rows, nextModel);
+                        var childRowsWithKeys = exports.addKeysToData(child_rows, nextModel.primaryKey, nextModel.foreignKey);
+                        exports.addChildrenToParent(parentRowsWithKeys, nextModel.data.modelName, childRowsWithKeys);
+                        childModelDone();
+                    }, function (err) {
+                        logger.error('failed to read data 2', err);
+                        reject(err);
+                    });
+                };
+                async.each(modelDefinition.children, readChildModel, function (err) {
+                    if (err) {
+                        logger.error('failed to read data 3', err);
+                        reject(err);
+                        return;
+                    }
+                    resolve(parentRowsWithKeys);
                 });
-            };
-            async.each(modelDefinition.children, readChildModel, function (err) {
-                if (err) {
-                    logger.error('failed to read data 3', err);
-                    callback(null, err);
-                    return;
-                }
-                callback(parentRowsWithKeys);
-            });
-        } else {
-            callback(parentRowsWithKeys);
-        }
-    }, function (err) {
-        logger.error('failed to read data 4');
-        logger.error(err);
-        callback(null, err);
+            } else {
+                resolve(parentRowsWithKeys);
+            }
+        }, function (err) {
+            reject(err);
+        });
+
     });
 };

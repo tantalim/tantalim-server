@@ -46,7 +46,6 @@ describe('Model Saver', function () {
         };
     });
 
-
     it('should return empty data', function () {
         var dataToSave = [];
         return saver.save(this.modelDefinition, []).should.eventually.eql(dataToSave);

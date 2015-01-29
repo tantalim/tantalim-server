@@ -29,22 +29,20 @@ function getModel(modelName, res, andThen) {
         .then(getModelDefinition, errorResponse);
 }
 
-exports.query = function (req, res, callback) {
-    callback = callback || function() {
-    };
-
+exports.query = function (req, res) {
     getModel(req.pageName, res, function (modelDefinition) {
-        reader.getData(modelDefinition, req.params.query, req.query, function (data, err) {
-            if (err) {
+        reader.getData(modelDefinition, req.params.query, req.query)
+            .then(function (data) {
+                res.jsonp(data);
+            })
+            .catch(function (err) {
                 return errorFullResponse(res, err);
-            }
-            res.jsonp(data);
-        });
+            });
     });
 };
 
 exports.save = function (req, res, callback) {
-    callback = callback || function() {
+    callback = callback || function () {
     };
     getModel(req.pageName, res, function (modelDefinition) {
         if (modelDefinition.data === undefined || modelDefinition.data.modelName === undefined) {
