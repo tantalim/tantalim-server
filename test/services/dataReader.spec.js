@@ -17,10 +17,10 @@ describe('Data Reader Service', function () {
         // TODO Mock the knex module inside dataReader service
         it('should select person', function () {
             var model = {
-                basisTable: { dbName: 'person'},
+                basisTable: {dbName: 'person'},
                 fields: [
-                    { fieldName: 'PersonFirstName', basisColumn: {dbName: 'firstName'} },
-                    { fieldName: 'PersonLastName', basisColumn: {dbName: 'lastName'} }
+                    {fieldName: 'PersonFirstName', basisColumn: {dbName: 'firstName'}},
+                    {fieldName: 'PersonLastName', basisColumn: {dbName: 'lastName'}}
                 ]
             };
 
@@ -32,11 +32,11 @@ describe('Data Reader Service', function () {
 
         it('should join to company and industry', function () {
             var model = {
-                basisTable: { dbName: 'person'},
+                basisTable: {dbName: 'person'},
                 fields: [
-                    { fieldName: 'PersonName', basisColumn: {dbName: 'name'} },
-                    { fieldName: 'PersonCompanyName', basisColumn: {dbName: 'name'}, fieldStepID: '20' },
-                    { fieldName: 'PersonCompanyIndustryName', basisColumn: {dbName: 'name'}, fieldStepID: '21' }
+                    {fieldName: 'PersonName', basisColumn: {dbName: 'name'}},
+                    {fieldName: 'PersonCompanyName', basisColumn: {dbName: 'name'}, fieldStepID: '20'},
+                    {fieldName: 'PersonCompanyIndustryName', basisColumn: {dbName: 'name'}, fieldStepID: '21'}
                 ],
                 steps: [
                     {
@@ -74,7 +74,7 @@ describe('Data Reader Service', function () {
 
         it('should join with complex on clause', function () {
             var model = {
-                basisTable: { dbName: 'person'},
+                basisTable: {dbName: 'person'},
                 steps: [
                     {
                         stepStepID: '20',
@@ -97,13 +97,13 @@ describe('Data Reader Service', function () {
 
         it('should order by last name', function () {
             var model = {
-                basisTable: { dbName: 'person'},
+                basisTable: {dbName: 'person'},
                 orderBy: [
                     {fieldName: 'PersonLastName', direction: 'DESC'}
                 ],
                 fields: [
-                    { fieldName: 'PersonFirstName', basisColumn: {dbName: 'firstName'} },
-                    { fieldName: 'PersonLastName', basisColumn: {dbName: 'lastName'} }
+                    {fieldName: 'PersonFirstName', basisColumn: {dbName: 'firstName'}},
+                    {fieldName: 'PersonLastName', basisColumn: {dbName: 'lastName'}}
                 ]
             };
 
@@ -117,9 +117,9 @@ describe('Data Reader Service', function () {
     describe('getParentFieldByChildStep', function () {
         it('should find field by column sql in step', function () {
             var parentFields = [
-                { fieldName: 'DepartmentID', basisColumn: {dbName: 'id'} },
-                { fieldName: 'DepartmentParentID', basisColumn: {dbName: 'id'}, fieldStepID: 'NOT_ME' },
-                { fieldName: 'DepartmentName', basisColumn: {dbName: 'name'} }
+                {fieldName: 'DepartmentID', basisColumn: {dbName: 'id'}},
+                {fieldName: 'DepartmentParentID', basisColumn: {dbName: 'id'}, fieldStepID: 'NOT_ME'},
+                {fieldName: 'DepartmentName', basisColumn: {dbName: 'name'}}
             ];
             var childStepJoinColumns = [
                 {fromColSql: 'departmentID', toColSql: 'id'}
@@ -166,7 +166,7 @@ describe('Data Reader Service', function () {
             var parentData = [
                 {
                     id: '1',
-                    data: { ID: '1', Name: 'Table1'}
+                    data: {ID: '1', Name: 'Table1'}
                 }
             ];
             service.addChildrenToParent(parentData, 'foo', []);
@@ -177,14 +177,14 @@ describe('Data Reader Service', function () {
             var parentData = [
                 {
                     id: '1',
-                    data: { ID: '1', Name: 'Table1'}
+                    data: {ID: '1', Name: 'Table1'}
                 }
             ];
             var children = [
                 {
                     id: '1',
                     foreignKey: '1',
-                    data: { ID: '1', Name: 'Column1', TableID: '1' }
+                    data: {ID: '1', Name: 'Column1', TableID: '1'}
                 }
             ];
             service.addChildrenToParent(parentData, 'foo', children);
@@ -199,7 +199,7 @@ describe('Data Reader Service', function () {
 
         it('should get the same number of rows', function () {
             var testData = [
-                { foo: '1'}
+                {foo: '1'}
             ];
             var results = service.addKeysToData(testData);
             results.length.should.equal(testData.length);
@@ -207,7 +207,7 @@ describe('Data Reader Service', function () {
 
         it('should put the data in', function () {
             var testData = [
-                { foo: '1'}
+                {foo: '1'}
             ];
             var results = service.addKeysToData(testData);
             should(results[0].data).eql(testData[0]);
@@ -215,7 +215,7 @@ describe('Data Reader Service', function () {
 
         it('should set the primary key', function () {
             var testData = [
-                { foo: '1'}
+                {foo: '1'}
             ];
             var results = service.addKeysToData(testData, {fieldName: 'foo'});
             should(results[0].id).eql('1');
@@ -223,15 +223,15 @@ describe('Data Reader Service', function () {
 
         it('should set the foreign key', function () {
             var testData = [
-                { id: '1', foreignKey: '2'}
+                {id: '1', foreignKey: '2'}
             ];
             var results = service.addKeysToData(testData, 'id', 'foreignKey');
             should(results[0].foreignKey).eql('2');
         });
     });
-    describe('getData', function() {
+    describe('getData', function () {
         var model = {
-            basisTable: { dbName: 'person'}
+            basisTable: {dbName: 'person'}
         };
         it('should error', function () {
             client.query = BluebirdPromise.method(function () {
