@@ -44,6 +44,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-mocha-test');
 
+    // TODO Consider using https://github.com/daniellmb/grunt-istanbul-coverage
+
     //Default task(s).
     grunt.registerTask('default', ['jshint', 'watch']);
 
