@@ -135,8 +135,13 @@ exports.getModelSql = function (md, parentModel, parentData) {
         });
 
         if (!childStep) {
-            throw new Error('Could not find valid stepID ' + md.data.parent_stepID +
-            ' to link child ' + md.data.modelName + ' to parent');
+            var err = 'Could not find valid stepID ';
+            try {
+                console.debug(md.data);
+                err += md.data.parent_stepID + ' to link child ' + md.data.modelName + ' to parent';
+            } finally {
+                throw err;
+            }
         }
 
         var parentPrimaryKeyAkaToColumn = exports.getParentFieldByChildStep(parentModel.fields, childStep.joinColumns);
@@ -173,13 +178,12 @@ function addDefaultFilter(sql, modelDefinition, filterValue) {
     }
 
     if (!modelDefinition.defaultFilter) {
-        logger.error('default filter value is used but no default filter is defined in Model: ' + modelDefinition);
-        return;
+        throw 'default filter value is used but no default filter is defined in Model: ' + modelDefinition;
     }
 
     var primaryFilterField = getFieldSql(modelDefinition.defaultFilter);
     // TODO Test SQL Injection here
-    sql.where(primaryFilterField, 'like', '%' + filterValue + '%');
+    sql.where(primaryFilterField, '=', filterValue);
 
     logger.debug('Added runtime filterValue');
     logger.debug(sql.toSql());
@@ -187,7 +191,7 @@ function addDefaultFilter(sql, modelDefinition, filterValue) {
 //exports.addFilter = addDefaultFilter;
 
 function findField(modelDefinition, fieldName) {
-    return _.find(modelDefinition.fields, function(field) {
+    return _.find(modelDefinition.fields, function (field) {
         if (field.fieldName === fieldName) {
             return field;
         }
@@ -205,70 +209,74 @@ function addAdvancedWhereClauses(sql, modelDefinition, advancedWhereClauses) {
     });
 }
 
-function postQueryDataConversion(parent_rows, modelDefinition) {
-    logger.debug('postQueryDataConversion');
-    _.forEach(modelDefinition.fields, function (field) {
-        if (field.dataType === 'Boolean') {
-            _.forEach(parent_rows, function (row) {
-                row[field.fieldName] = !(!row[field.fieldName]);
-            });
-        }
-    });
-}
-
 exports.getData = function (modelDefinition, defaultFilterValue, advancedWhereClauses) {
-    return new BluebirdPromise(function (resolve, reject) {
-        defaultFilterValue = defaultFilterValue ? defaultFilterValue : {};
-        advancedWhereClauses = advancedWhereClauses ? advancedWhereClauses : [];
+    function postQueryDataConversion(parent_rows, modelDefinition) {
+        logger.debug('postQueryDataConversion');
+        _.forEach(modelDefinition.fields, function (field) {
+            if (field.dataType === 'Boolean') {
+                _.forEach(parent_rows, function (row) {
+                    row[field.fieldName] = !(!row[field.fieldName]);
+                });
+            }
+        });
+    }
 
+    return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting getData');
-        logger.debug('defaultFilterValue = ', defaultFilterValue);
-        logger.debug('advancedWhereClauses = ', advancedWhereClauses);
 
         var modelSql = exports.getModelSql(modelDefinition);
+
+        defaultFilterValue = defaultFilterValue ? defaultFilterValue : {};
+        logger.debug('defaultFilterValue = ', defaultFilterValue);
+        advancedWhereClauses = advancedWhereClauses ? advancedWhereClauses : [];
+        logger.debug('advancedWhereClauses = ', advancedWhereClauses);
 
         addDefaultFilter(modelSql, modelDefinition, defaultFilterValue);
         addAdvancedWhereClauses(modelSql, modelDefinition, advancedWhereClauses);
 
-        modelSql.then(function (parent_rows) {
-            postQueryDataConversion(parent_rows, modelDefinition);
-            var parentRowsWithKeys = exports.addKeysToData(parent_rows, modelDefinition.primaryKey);
-            if (modelDefinition.children && modelDefinition.children.length > 0) {
-                var readChildModel = function (nextModel, childModelDone) {
-                    if (!nextModel.data) {
+        modelSql
+            .then(function (parent_rows) {
+                postQueryDataConversion(parent_rows, modelDefinition);
+                var parentRowsWithKeys = exports.addKeysToData(parent_rows, modelDefinition.primaryKey);
+                if (modelDefinition.children && modelDefinition.children.length > 0) {
+                    var readChildModel = function (nextModel, childModelDone) {
+                        if (!nextModel.data) {
+                            resolve(parentRowsWithKeys);
+                        }
+                        var sqlColumns;
+                        try {
+                            sqlColumns = exports.getModelSql(nextModel, modelDefinition, parent_rows);
+                        } catch (err) {
+                            logger.error('failed to get sql for child model');
+                            reject(err);
+                            return;
+                        }
+                        sqlColumns.then(function (child_rows) {
+                            postQueryDataConversion(child_rows, nextModel);
+                            var childRowsWithKeys = exports.addKeysToData(child_rows, nextModel.primaryKey, nextModel.foreignKey);
+                            exports.addChildrenToParent(parentRowsWithKeys, nextModel.data.modelName, childRowsWithKeys);
+                            childModelDone();
+                        }, function (err) {
+                            logger.error('failed to read data 2', err);
+                            reject(err);
+                            return;
+                        });
+                    };
+                    async.each(modelDefinition.children, readChildModel, function (err) {
+                        if (err) {
+                            logger.error('failed to read data 3', err);
+                            reject(err);
+                            return;
+                        }
                         resolve(parentRowsWithKeys);
-                    }
-                    var sqlColumns;
-                    try {
-                        sqlColumns = exports.getModelSql(nextModel, modelDefinition, parent_rows);
-                    } catch (err) {
-                        logger.error('failed to read data 1', err);
-                        reject(err);
-                    }
-                    sqlColumns.then(function (child_rows) {
-                        postQueryDataConversion(child_rows, nextModel);
-                        var childRowsWithKeys = exports.addKeysToData(child_rows, nextModel.primaryKey, nextModel.foreignKey);
-                        exports.addChildrenToParent(parentRowsWithKeys, nextModel.data.modelName, childRowsWithKeys);
-                        childModelDone();
-                    }, function (err) {
-                        logger.error('failed to read data 2', err);
-                        reject(err);
                     });
-                };
-                async.each(modelDefinition.children, readChildModel, function (err) {
-                    if (err) {
-                        logger.error('failed to read data 3', err);
-                        reject(err);
-                        return;
-                    }
+                } else {
                     resolve(parentRowsWithKeys);
-                });
-            } else {
-                resolve(parentRowsWithKeys);
-            }
-        }, function (err) {
-            reject(err);
-        });
+                }
+            })
+            .catch(function (err) {
+                reject(err);
+            });
 
     });
 };

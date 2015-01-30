@@ -229,21 +229,96 @@ describe('Data Reader Service', function () {
             should(results[0].foreignKey).eql('2');
         });
     });
-    describe('getData', function () {
-        var model = {
-            basisTable: {dbName: 'person'}
-        };
-        it('should error', function () {
-            client.query = BluebirdPromise.method(function () {
-                throw 'test error';
-            });
-            return service.getData(model).should.eventually.be.rejected;
+    describe('getData for simple model', function () {
+        var model;
+
+        beforeEach(function () {
+            var lastName = {'fieldName': 'PersonLastName', 'basisColumn': {'dbName': 'lastName'}};
+
+            model = {
+                basisTable: {dbName: 'person'},
+                defaultFilter: lastName,
+                fields: [lastName]
+            };
         });
-        it('should query', function () {
+
+        it('should error if database is down', function () {
             client.query = BluebirdPromise.method(function () {
+                throw 'database is down';
+            });
+            return service.getData(model).should.be.rejected;
+        });
+        it('should fail if no default fiter exists', function () {
+            delete model.defaultFilter;
+            return service.getData(model, 'foo').should.be.rejected;
+        });
+        it('should use default fiter', function () {
+            client.query = BluebirdPromise.method(function (sql) {
+                //sql.should.equal("");
+                var expected = 'select `t0`.`lastName` as `PersonLastName` ' +
+                    'from `person` as `t0` where `t0`.`lastName` = ?';
+                sql.toSql().should.equal(expected);
                 return [];
             });
-            service.getData(model);
+            return service.getData(model, 'foo');
+        });
+        it('should query one row', function () {
+            client.query = BluebirdPromise.method(function () {
+                return [{
+                    PersonLastName: 'Allred'
+                }];
+            });
+            return service.getData(model).should.become([{
+                data: {
+                    PersonLastName: 'Allred'
+                }
+            }]);
+        });
+    });
+    describe('getData for model with child view', function () {
+        var model;
+
+        beforeEach(function () {
+            model = {
+                basisTable: {dbName: 'person'},
+                fields: [{'fieldName': 'PersonName', 'basisColumn': {'dbName': 'name'}}],
+                children: [
+                    {
+                        basisTable: {dbName: 'child'},
+                        fields: [{'fieldName': 'ChildName', 'basisColumn': {'dbName': 'name'}}],
+                        children: [
+                            {
+                                basisTable: {dbName: 'grandchild'},
+                                fields: [{'fieldName': 'GrandchildName', 'basisColumn': {'dbName': 'name'}}]
+                            }
+                        ]
+                    }]
+            };
+            client.query = BluebirdPromise.method(function (foo) {
+                console.info(foo.toSql());
+                return [{
+                    PersonName: 'Allred'
+                }];
+            });
+        });
+
+        it.skip('should fail if the child step is missing', function () {
+            delete model.children[0].steps;
+            return service.getData(model).should.be.rejected;
+        });
+
+        it.skip('should query one row', function () {
+            client.query = BluebirdPromise.method(function (foo) {
+                console.info(foo.toSql());
+                return [{
+                    PersonName: 'Allred'
+                }];
+            });
+            return service.getData(model).should.become([{
+                data: {
+                    PersonName: 'Allred'
+                }
+            }]);
         });
     });
 });
