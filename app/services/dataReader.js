@@ -121,7 +121,8 @@ function addKeysToData(data, instanceID, foreignKeyName) {
 }
 
 function addChildrenToParent(parents, childModel, children) {
-    logger.debug('starting addChildrenToParent from ' + childModel.data.modelName);
+    var modelName = childModel.data.modelName;
+    logger.debug('starting addChildrenToParent from ' + modelName);
     _.forEach(parents, function (parent) {
         if (parent.children === undefined) {
             parent.children = {};
@@ -129,7 +130,7 @@ function addChildrenToParent(parents, childModel, children) {
 
         var foreignKey = _.isArray(childModel.foreignKeys) ? childModel.foreignKeys[0] : childModel.foreignKeys;
         if (foreignKey) {
-            parent.children[childModel.data.modelName] = _.filter(children, function (child) {
+            parent.children[modelName] = _.filter(children, function (child) {
                 return parent.data[foreignKey.parentField] === child.data[foreignKey.childField];
             });
         }

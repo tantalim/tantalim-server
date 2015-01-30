@@ -254,6 +254,21 @@ describe('Data Reader Service', function () {
                         data: {
                             modelName: 'Child'
                         },
+                        foreignKeys: [{
+                            parentField: 'PersonName',
+                            childField: 'PersonName'
+                        }],
+                        steps: [
+                            {
+                                stepStepID: '20',
+                                stepPreviousStepID: null,
+                                joinToTableSql: 'company',
+                                joinRequired: '1',
+                                joinColumns: [
+                                    {fromColSql: 'companyID', toColSql: 'id'}
+                                ]
+                            }
+                        ],
                         basisTable: {dbName: 'child'},
                         fields: [{'fieldName': 'ChildName', 'basisColumn': {'dbName': 'name'}}],
                         children: [
@@ -261,6 +276,10 @@ describe('Data Reader Service', function () {
                                 data: {
                                     modelName: 'Grandchild'
                                 },
+                                foreignKeys: [{
+                                    parentField: 'PersonName',
+                                    childField: 'PersonName'
+                                }],
                                 basisTable: {dbName: 'grandchild'},
                                 fields: [{'fieldName': 'GrandchildName', 'basisColumn': {'dbName': 'name'}}]
                             }
@@ -301,7 +320,6 @@ describe('Data Reader Service', function () {
                             {fromColSql: 'industryCode', toColSql: 'code'}
                         ]
                     }
-
                 ]
             };
 
