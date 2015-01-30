@@ -4,7 +4,7 @@ var config = require('../config');
 var service = require('../' + config.appRoot + 'app/services/modelService');
 var should = require('should');
 
-// TODO Get this to pass tests
+// TODO until the model service is filled out more, I'm going to skip all of these tests
 describe.skip('Model Service', function () {
     describe('toWhere', function () {
         it('should require a model name', function () {

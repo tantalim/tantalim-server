@@ -2,7 +2,6 @@
 
 var config = require('../config'),
     BluebirdPromise = require('bluebird'),
-    should = require('should'),
     client = config.knex().client,
     chai = require('chai')
     ;
@@ -176,22 +175,55 @@ describe('Data Reader Service', function () {
                 var queryText = sql.toSql();
                 if (queryText.indexOf('Child') > 0) {
                     var expected = 'select `t0`.`parentID` as `ParentID`, `t0`.`name` as `ChildName` ' +
-                        'from `child` as `t0` where `t0`.`parentID` in (?)';
+                        'from `child` as `t0` where `t0`.`parentID` in (?, ?)';
                     queryText.should.equal(expected);
-                    sql.bindings.should.eql([1]);
+                    sql.bindings.should.eql([1, 2]);
                     return [{
                         ChildID: 2,
                         ParentID: 1,
                         ChildName: 'Doe'
                     }];
                 } else {
-                    return [{
-                        PersonID: 1,
-                        PersonName: 'John'
-                    }];
+                    return [
+                        {
+                            PersonID: 1,
+                            PersonName: 'John'
+                        },
+                        {
+                            PersonID: 2,
+                            PersonName: 'Mike'
+                        }
+                    ];
                 }
             });
-            return service.getData(model);
+            return service.getData(model).should.become([
+                {
+                    id: 1,
+                    data: {
+                        PersonID: 1,
+                        PersonName: 'John'
+                    },
+                    children: {
+                        Child: [{
+                            data: {
+                                ChildID: 2,
+                                ParentID: 1,
+                                ChildName: 'Doe'
+                            }
+                        }]
+                    }
+                },
+                {
+                    id: 2,
+                    data: {
+                        PersonID: 2,
+                        PersonName: 'Mike'
+                    },
+                    children: {
+                        Child: []
+                    }
+                }
+            ]);
         });
 
         it('should error on child data', function () {
@@ -242,24 +274,6 @@ describe('Data Reader Service', function () {
             });
         });
 
-        it.skip('should add child data', function () {
-            var parentData = [
-                {
-                    id: '1',
-                    data: {ID: '1', Name: 'Table1'}
-                }
-            ];
-            var children = [
-                {
-                    id: '1',
-                    foreignKey: '1',
-                    data: {ID: '1', Name: 'Column1', TableID: '1'}
-                }
-            ];
-            service.addChildrenToParent(parentData, 'foo', children);
-            should(parentData[0].children.foo[0].data).eql(children[0].data);
-        });
-
         it.skip('should join to company and industry', function () {
             var model = {
                 basisTable: {dbName: 'person'},
@@ -299,29 +313,6 @@ describe('Data Reader Service', function () {
                 'from `person` as `t0` ' +
                 'inner join `company` as `t1` on `t1`.`id` = `t0`.`companyID` ' +
                 'left join `industry` as `t2` on `t2`.`code` = `t1`.`industryCode`';
-            sql.toSql().should.equal(expected);
-        });
-
-        it.skip('should join with complex on clause', function () {
-            var model = {
-                basisTable: {dbName: 'person'},
-                steps: [
-                    {
-                        stepStepID: '20',
-                        stepPreviousStepID: null,
-                        joinToTableSql: 'company',
-                        joinRequired: '1',
-                        joinColumns: [
-                            {fromColSql: 'industryCode', fromText: null, toColSql: 'code'},
-                            {fromColSql: null, fromText: 'Y', toColSql: 'active'}
-                        ]
-                    }
-                ]
-            };
-
-            var sql = service.getModelSql(model);
-            var expected = 'select * from `person` as `t0` ' +
-                'inner join `company` as `t1` on `t1`.`code` = `t0`.`industryCode` and `t1`.`active` = \'Y\'';
             sql.toSql().should.equal(expected);
         });
 

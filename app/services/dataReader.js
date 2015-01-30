@@ -120,15 +120,19 @@ function addKeysToData(data, instanceID, foreignKeyName) {
     });
 }
 
-function addChildrenToParent(parents, childName, children) {
-    logger.debug('starting addChildrenToParent');
+function addChildrenToParent(parents, childModel, children) {
+    logger.debug('starting addChildrenToParent from ' + childModel.data.modelName);
     _.forEach(parents, function (parent) {
         if (parent.children === undefined) {
             parent.children = {};
         }
-        parent.children[childName] = _.filter(children, function (child) {
-            return parent.id === child.foreignKey;
-        });
+
+        var foreignKey = _.isArray(childModel.foreignKeys) ? childModel.foreignKeys[0] : childModel.foreignKeys;
+        if (foreignKey) {
+            parent.children[childModel.data.modelName] = _.filter(children, function (child) {
+                return parent.data[foreignKey.parentField] === child.data[foreignKey.childField];
+            });
+        }
     });
 }
 
@@ -260,13 +264,14 @@ function queryModelData(model) {
 
                     childModel.filter = new Filter();
                     // TODO support runtime filters on child models
+                    // See if we can guess the foreignKeys from the first and last step
                     if (childModel.foreignKeys) {
                         childModel.filter.add(createForeignKeyJoinFilter(childModel, rawData));
                     }
 
                     queryModelData(childModel)
                         .then(function (childResults) {
-                            addChildrenToParent(results, childModel.data.modelName, childResults);
+                            addChildrenToParent(results, childModel, childResults);
                             childModelDone();
                         })
                         .catch(function (err) {
