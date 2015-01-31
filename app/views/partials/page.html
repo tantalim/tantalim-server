@@ -10,17 +10,6 @@
     </div>
     {{/if}}
     <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
-        <button type="button" class="btn btn-default" data-ng-click="PageCursor.pages.{{id}}.viewMode = 'multiple'"
-                data-ng-show="PageCursor.pages.{{id}}.viewMode !== 'multiple'">
-            <span class="glyphicon glyphicon-th"></span>
-            Multiple
-        </button>
-        <button type="button" class="btn btn-default" data-ng-click="PageCursor.pages.{{id}}.viewMode = 'single'"
-                data-ng-show="PageCursor.pages.{{id}}.viewMode !== 'single'">
-            <span class="glyphicon glyphicon-file"></span>
-            Single
-        </button>
-
         <a href="#/search" class="btn btn-default">
             <span class="glyphicon glyphicon-search"></span>
             Search View</a>
