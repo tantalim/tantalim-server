@@ -1,6 +1,6 @@
 {
   "name": "tantalim-server",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tantalim Backend Server side files for Node.js web application",
   "author": "Trevor Allred",
   "license": "GPLv3",
