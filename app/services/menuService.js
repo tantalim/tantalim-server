@@ -6,11 +6,11 @@ exports.items = [
         items: [
             {
                 title: 'List Tables',
-                link: '/page/ListTables/'
+                link: '/page/ListTables/#/'
             },
             {
                 title: 'Build Table',
-                link: '/page/BuildTable/'
+                link: '/page/BuildTable/#/'
             }
         ]
     },
@@ -19,11 +19,11 @@ exports.items = [
         items: [
             {
                 title: 'List Models',
-                link: '/page/ListModels/'
+                link: '/page/ListModels/#/'
             },
             {
                 title: 'Build Model',
-                link: '/page/BuildModel/'
+                link: '/page/BuildModel/#/'
             }
         ]
     },
@@ -32,11 +32,11 @@ exports.items = [
         items: [
             {
                 title: 'List Pages',
-                link: '/page/ListPages/'
+                link: '/page/ListPages/#/'
             },
             {
                 title: 'Build Table',
-                link: '/page/BuildPage/'
+                link: '/page/BuildPage/#/'
             }
         ]
     },
@@ -45,11 +45,11 @@ exports.items = [
         items: [
             {
                 title: 'List Roles',
-                link: '/page/ListRoles/'
+                link: '/page/ListRoles/#/'
             },
             {
                 title: 'Build Menu',
-                link: '/page/BuildMenu/'
+                link: '/page/BuildMenu/#/'
             }
         ]
     },
@@ -58,11 +58,11 @@ exports.items = [
         items: [
             {
                 title: 'Plain HTML',
-                link: '/page/SamplePage/'
+                link: '/page/SamplePage/#/'
             },
             {
                 title: 'TestUnit',
-                link: '/page/TestUnit/'
+                link: '/page/TestUnit/#/'
             }
         ]
     }
