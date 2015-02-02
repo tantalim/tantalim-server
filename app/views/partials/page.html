@@ -1,21 +1,12 @@
 <div id="{{id}}" data-ng-show="visibleView == '{{id}}'">
-    {{#if breadcrumb}}
-    <div class="row" data-ng-show="true">
-        <ol class="breadcrumb">
-            {{#breadcrumb}}
-            <li><a href data-ng-click="visibleView = '{{pageID}}'"
-                   data-ng-bind="current.instances.{{modelName}}.data.{{field}}"></a></li>
-            {{/breadcrumb}}
-        </ol>
-    </div>
-    {{/if}}
     <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
         <a href="#/search" class="btn btn-default">
             <span class="glyphicon glyphicon-search"></span>
             Search View</a>
-        <a href="#" class="btn btn-default">
+        <button data-ng-click="refresh()" class="btn btn-default">
             <span class="glyphicon glyphicon-refresh"></span>
-            Refresh</a>
+            Refresh
+        </button>
         <button data-ng-click="save()" class="btn btn-success" data-ng-disabled="!ModelCursor.dirty">
             <span class="glyphicon glyphicon-floppy-disk"></span>
             Save

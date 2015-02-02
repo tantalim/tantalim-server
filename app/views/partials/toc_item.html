@@ -1,7 +1,8 @@
-<a href="#/p/{{id}}" class="btn btn-default {{bootstrapClassesForToc depth}}"
-   data-ng-class="{active: visibleView=='{{id}}'}">
+<a href="" class="btn btn-default {{bootstrapClassesForToc depth}}"
+   data-ng-class="{active: visibleView=='{{id}}'}"
+   data-ng-click="gotoAnchor('{{id}}')">
     {{title}}
 </a>
-{{#pages}}
+{{#children}}
 {{> toc_item}}
-{{/pages}}
+{{/children}}
