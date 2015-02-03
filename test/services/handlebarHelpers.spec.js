@@ -5,7 +5,7 @@ var config = require('../config'),
     helper = require(configAppRoot + 'services/handlebarHelpers'),
     chai = require('chai');
 
-chai.Should();
+chai.should();
 
 describe('Handlebar Helpers', function () {
     it('should set angular variable', function () {

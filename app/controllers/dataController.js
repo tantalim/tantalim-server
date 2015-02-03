@@ -31,7 +31,7 @@ function getModel(modelName, res, andThen) {
 
 exports.query = function (req, res) {
     getModel(req.pageName, res, function (modelDefinition) {
-        reader.getData(modelDefinition, req.params.query, req.query)
+        reader.getData(modelDefinition, req.query.filterString, req.query.pageNumber)
             .then(function (data) {
                 res.jsonp(data);
             })

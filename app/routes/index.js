@@ -30,15 +30,9 @@ function addUserPages(app) {
 function addDataApi(app) {
     var dataController = require('../controllers/dataController');
 
-    function queryData(req, res) {
+    app.get('/data/:pageName', function (req, res) {
         dataController.query(req, res);
-    }
-
-    app.get('/data/:pageName', queryData);
-    app.get('/data/:pageName', queryData);
-    app.get('/data/:pageName/q/:query', queryData);
-    app.get('/data/:pageName/q/',  queryData);
-
+    });
     app.post('/data/:pageName', function (req, res) {
         dataController.save(req, res);
     });

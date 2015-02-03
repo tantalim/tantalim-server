@@ -4,7 +4,8 @@ var _ = require('lodash'),
     BluebirdPromise = require('bluebird'),
     async = require('async'),
     logger = require('../logger/default').main,
-    knex = require('knex').knex;
+    knex = require('knex').knex,
+    filter = require('./filter');
 
 var getTableAlias = function (stepCounter, stepID) {
     if (stepID && stepCounter[stepID])
@@ -48,15 +49,6 @@ var Field = function (json, model) {
 function convertModelToKnexSql(model) {
     var sql = knex(model.basisTable.dbName + ' as t0');
 
-    if (_.isArray(model.orderBy)) {
-        _.forEach(model.orderBy, function (orderBy) {
-            // Double check that order by is either DESC or ASC.
-            // We might consider removing this and just add orderBy since Knex has it's own checking
-            var direction = orderBy.direction === 'DESC' ? 'DESC' : '';
-            sql.orderBy(orderBy.fieldName, direction);
-        });
-    }
-
     if (_.isArray(model.steps)) {
         (function () {
             var stepCounter = 1;
@@ -95,8 +87,19 @@ function convertModelToKnexSql(model) {
         });
     }
 
+    if (_.isArray(model.orderBy)) {
+        _.forEach(model.orderBy, function (orderBy) {
+            // Double check that order by is either DESC or ASC.
+            // We might consider removing this and just add orderBy since Knex has it's own checking
+            var direction = orderBy.direction === 'DESC' ? 'DESC' : '';
+            sql.orderBy(orderBy.fieldName, direction);
+        });
+    }
+
     var fields = _.map(model.fields, function (json) {
-        return (new Field(json, model)).toSqlAsName();
+        var field = new Field(json, model);
+        json.sql = field.toSql();
+        return field.toSqlAsName();
     });
     sql.select(fields);
 
@@ -208,18 +211,14 @@ function queryModelData(model) {
         var sql = convertModelToKnexSql(model);
 
         if (model.filter) {
-            // Add Filters to Knex Where Clause
-            _.forEach(model.filter.clauses, function (filterComparison) {
-                logger.debug('Adding filter comparison to knex.where');
-                logger.debug(filterComparison);
-                if (filterComparison.isValid()) {
-                    if (filterComparison.comparator === FilterComparator.IN) {
-                        sql.whereIn(filterComparison.left, filterComparison.right);
-                    } else {
-                        sql.where(filterComparison.left, filterComparison.comparator, filterComparison.right);
-                    }
-                }
-            });
+            filter.apply(model.filter, sql, model.fields);
+        }
+
+        if (model.limit > 0) {
+            sql.limit(model.limit);
+            if (model.pageNumber > 1) {
+                sql.offset(model.limit * (model.pageNumber - 1));
+            }
         }
 
         // Run Query against database
@@ -244,30 +243,25 @@ function queryModelData(model) {
                 async.each(model.children, function (childModel, childModelDone) {
 
                     function createForeignKeyJoinFilter(childModel, rawData) {
+                        var foreignKeys = _.map(childModel.foreignKeys, function(foreignKey) {
+                            return foreignKey.childField;
+                        });
+
                         var parentIDs = _.flatten(_.map(rawData, function (parentRow) {
                             return _.map(childModel.foreignKeys, function (foreignKey) {
                                 return parentRow[foreignKey.parentField];
                             });
                         }));
 
-                        var foreignKeys = _.map(childModel.foreignKeys, function(foreignKey) {
-                            var foundField = _.find(childModel.fields, function (field) {
-                                if (field.fieldName === foreignKey.childField) {
-                                    return field;
-                                }
-                            });
-                            return new Field(foundField, childModel);
-                        });
-
                         // TODO support multiple foreign key joins when knex supports them
-                        return new FilterComparison(foreignKeys[0].toSql(), FilterComparator.IN, parentIDs);
+                        return foreignKeys[0] + ' IN ' + parentIDs;
                     }
 
                     childModel.filter = new Filter();
                     // TODO support runtime filters on child models
                     // See if we can guess the foreignKeys from the first and last step
                     if (childModel.foreignKeys) {
-                        childModel.filter.add(createForeignKeyJoinFilter(childModel, rawData));
+                        childModel.filter = createForeignKeyJoinFilter(childModel, rawData);
                     }
 
                     queryModelData(childModel)
@@ -288,11 +282,10 @@ function queryModelData(model) {
     });
 }
 
-exports.getData = function (modelDefinition, defaultFilterValue, advancedWhereClauses) {
+exports.getData = function (modelDefinition, filterString, pageNumber) {
     return new BluebirdPromise(function (resolve, reject) {
-        modelDefinition.filter = new Filter(modelDefinition);
-        modelDefinition.filter.addDefaultFilter(defaultFilterValue);
-        modelDefinition.filter.addAdvancedWhereClause(advancedWhereClauses);
+        modelDefinition.filter = filterString;
+        modelDefinition.pageNumber = pageNumber;
 
         queryModelData(modelDefinition)
             .then(resolve)

@@ -22,7 +22,6 @@ describe('Data Reader Service', function () {
                 basisTable: {dbName: 'person'},
                 instanceID: 'PersonLastName',
                 foreignKey: 'PersonLastName',
-                defaultFilter: lastName,
                 fields: [lastName]
             };
         });
@@ -32,19 +31,6 @@ describe('Data Reader Service', function () {
                 throw 'database is down';
             });
             return service.getData(model).should.be.rejected;
-        });
-        it('should fail if no default filter exists', function () {
-            delete model.defaultFilter;
-            return service.getData(model, 'foo').should.be.rejected;
-        });
-        it('should use default filter', function () {
-            client.query = BluebirdPromise.method(function (sql) {
-                var expected = 'select `t0`.`lastName` as `PersonLastName` ' +
-                    'from `person` as `t0` where `t0`.`lastName` = ?';
-                sql.toSql().should.equal(expected);
-                return [];
-            });
-            return service.getData(model, 'foo');
         });
         it('should sort by name', function () {
             model.orderBy = [
@@ -177,7 +163,7 @@ describe('Data Reader Service', function () {
                     var expected = 'select `t0`.`parentID` as `ParentID`, `t0`.`name` as `ChildName` ' +
                         'from `child` as `t0` where `t0`.`parentID` in (?, ?)';
                     queryText.should.equal(expected);
-                    sql.bindings.should.eql([1, 2]);
+                    sql.bindings.should.eql(['1', '2']);
                     return [{
                         ChildID: 2,
                         ParentID: 1,
