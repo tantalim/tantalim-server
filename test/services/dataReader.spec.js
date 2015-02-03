@@ -242,7 +242,7 @@ describe('Data Reader Service', function () {
                         },
                         foreignKeys: [{
                             parentField: 'PersonName',
-                            childField: 'PersonName'
+                            childField: 'ChildName'
                         }],
                         steps: [
                             {
@@ -263,8 +263,8 @@ describe('Data Reader Service', function () {
                                     modelName: 'Grandchild'
                                 },
                                 foreignKeys: [{
-                                    parentField: 'PersonName',
-                                    childField: 'PersonName'
+                                    parentField: 'ChildName',
+                                    childField: 'GrandchildName'
                                 }],
                                 basisTable: {dbName: 'grandchild'},
                                 fields: [{'fieldName': 'GrandchildName', 'basisColumn': {'dbName': 'name'}}]
@@ -272,10 +272,21 @@ describe('Data Reader Service', function () {
                         ]
                     }]
             };
-            client.query = BluebirdPromise.method(function () {
-                return [{
-                    PersonName: 'Allred'
-                }];
+            client.query = BluebirdPromise.method(function (sql) {
+                var queryText = sql.toSql();
+                if (queryText.indexOf('Grand') > 0) {
+                    return [{
+                        GrandchildName: 'Allred'
+                    }];
+                } else if (queryText.indexOf('Child') > 0) {
+                    return [{
+                        ChildName: 'Allred'
+                    }];
+                } else {
+                    return [{
+                        PersonName: 'Allred'
+                    }];
+                }
             });
         });
 
@@ -321,15 +332,14 @@ describe('Data Reader Service', function () {
         });
 
         it('should query data', function () {
-            var mockData = {PersonName: 'Allred'};
             return service.getData(model).should.become([{
-                data: mockData,
+                data: {PersonName: 'Allred'},
                 children: {
                     Child: [{
-                        data: mockData,
+                        data: {ChildName: 'Allred'},
                         children: {
                             Grandchild: [{
-                                data: mockData
+                                data: {GrandchildName: 'Allred'}
                             }]
                         }
                     }]
