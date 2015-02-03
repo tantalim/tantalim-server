@@ -1,16 +1,13 @@
 'use strict';
 
 var pageController = require('../controllers/pageController'),
-    menuController = require('../controllers/menuController');
+    menuController = require('../controllers/menuController'),
+    passport = require('passport');
 
 function addUserPages(app) {
     app.get('/m/:pageName', function (req, res) {
         pageController.mobile(req, res);
     });
-
-//    app.get('/page/:pageName', function (req, res) {
-//        res.redirect('/page/' + req.pageName + '/');
-//    });
 
     app.get('/page/:pageName/', function (req, res) {
         pageController.desktop(req, res);
@@ -60,6 +57,25 @@ function addFrontEndJavaScriptAndHtmlPartials(app) {
     });
 }
 
+function addLogins(app) {
+    app.get('/logout', function (req, res) {
+        req.logout();
+        res.redirect('/');
+    });
+
+    app.get('/login', function (req, res) {
+        res.render('security/login');
+    });
+
+    app.post('/login',
+        passport.authenticate('local', {
+            successRedirect: '/',
+            failureRedirect: '/login',
+            failureFlash: true
+        })
+    );
+}
+
 module.exports = function (app) {
     app.param('pageName', function (req, res, next, pageName) {
         req.pageName = pageName;
@@ -70,6 +86,7 @@ module.exports = function (app) {
         menuController.menu(req, res);
     });
 
+    addLogins(app);
     addUserPages(app);
     addFrontEndJavaScriptAndHtmlPartials(app);
     addDataApi(app);

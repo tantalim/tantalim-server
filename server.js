@@ -6,8 +6,11 @@ var _ = require('lodash'),
     compression = require('compression'),
     cookieParser = require('cookie-parser'),
     cookieSession = require('cookie-session'),
+    session = require('express-session'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
+    passport = require('passport'),
+    flash = require('connect-flash'),
     morgan = require('morgan');
 
 var path = require('path');
@@ -24,7 +27,8 @@ var setup = function (custom) {
         port: 3000,
         environment: process.env.NODE_ENV || 'development',
         sessionSecret: 'OVERRIDE_THIS_HASH_IN_YOUR_CONFIG',
-        sessionCollection: 'sessions'
+        sessionCollection: 'sessions',
+        passportStrategy: null
     };
     config = _.extend(defaultConfig, custom || {});
 
@@ -32,16 +36,31 @@ var setup = function (custom) {
     Knex.knex = Knex.initialize({
         client: 'mysql',
         connection: {
-            host     : config.db.server,
-            user     : config.db.username,
-            password : config.db.password,
-            database : config.db.database,
-            charset  : 'utf8'
+            host: config.db.server,
+            user: config.db.username,
+            password: config.db.password,
+            database: config.db.database,
+            charset: 'utf8'
         },
         pool: {
             max: 10
         }
     });
+
+    if (config.passportStrategy) {
+        passport.use(config.passportStrategy);
+        passport.serializeUser(function (user, done) {
+            done(null, user.id);
+        });
+
+        passport.deserializeUser(function (id, done) {
+            done(null, {
+                id: 'demo',
+                displayName: 'Demo User',
+                provider: 'tantalim'
+            });
+        });
+    }
 }
 
 /**
@@ -109,7 +128,7 @@ var start = function () {
     app.use(cookieParser());
 
     // Request body parsing middleware should be above methodOverride
-    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
     app.use(methodOverride());
 
@@ -118,6 +137,14 @@ var start = function () {
         key: 'app.sess',
         secret: config.sessionSecret
     }));
+
+    app.use(session({
+        cookie: {maxAge: 60000}
+    }));
+    app.use(flash());
+
+    app.use(passport.initialize());
+    app.use(passport.session());
 
     // Dynamic helpers
 //        app.use(helpers('Tantalim'));

@@ -8,9 +8,16 @@ var service = require('../services/pageService'),
  * Lightweight Angular Wrapper that pulls in other resources for Desktop Applications
  */
 exports.desktop = function (req, res) {
+    if (!req.user) {
+        res.redirect('/login');
+        return;
+    }
+
     res.render('desktop', {
+        appName: 'Tantalim Example',
         pageName: req.pageName,
-        title: req.pageName
+        title: req.pageName,
+        user: req.user
     });
 };
 
