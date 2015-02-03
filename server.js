@@ -61,7 +61,7 @@ var setup = function (custom) {
             });
         });
     }
-}
+};
 
 /**
  *
@@ -69,6 +69,8 @@ var setup = function (custom) {
  */
 var start = function () {
     var app = express();
+
+    app.locals = _.extend(app.locals, config.locals || {});
 
     app.set('showStackError', true);
 

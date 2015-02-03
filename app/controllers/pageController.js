@@ -4,6 +4,12 @@ var service = require('../services/pageService'),
     modelService = require('../services/modelService'),
     logger = require('../logger/default').main;
 
+var app;
+
+exports.setApp = function (_app) {
+    app = _app;
+};
+
 /**
  * Lightweight Angular Wrapper that pulls in other resources for Desktop Applications
  */
@@ -14,7 +20,7 @@ exports.desktop = function (req, res) {
     }
 
     res.render('desktop', {
-        appName: 'Tantalim Example',
+        appTitle: app.locals.title,
         pageName: req.pageName,
         title: req.pageName,
         user: req.user

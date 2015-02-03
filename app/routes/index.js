@@ -64,7 +64,10 @@ function addLogins(app) {
     });
 
     app.get('/login', function (req, res) {
-        res.render('security/login');
+        res.render('security/login', {
+            appTitle: app.locals.title,
+            message: req.flash('error')
+        });
     });
 
     app.post('/login',
@@ -77,6 +80,7 @@ function addLogins(app) {
 }
 
 module.exports = function (app) {
+    pageController.setApp(app);
     app.param('pageName', function (req, res, next, pageName) {
         req.pageName = pageName;
         next();
