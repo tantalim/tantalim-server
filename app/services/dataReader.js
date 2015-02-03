@@ -140,72 +140,6 @@ function addChildrenToParent(parents, childModel, children) {
     });
 }
 
-var FilterComparator = {
-    EQUALS: '=',
-    LIKE: 'like',
-    IN: 'in',
-    GREATER_THAN: '>'
-};
-
-var FilterComparison = function (left, comparator, right) {
-    var self = this;
-
-    self.left = left;
-    self.comparator = comparator || FilterComparator.EQUALS;
-    self.right = right;
-    self.isValid = function() {
-        return self.left && self.right;
-    };
-};
-
-var FilterJoin = {
-    AND: 'and',
-    OR: 'or'
-};
-
-var Filter = function (model) {
-    // Initialize defaults
-    var self = this;
-    self.clauses = [];
-    self.joiner = FilterJoin.AND;
-
-    self.add = function(value) {
-        if (value instanceof FilterComparison) {
-            self.clauses.push(value);
-        }
-    };
-
-    if (model instanceof FilterComparison) {
-        self.add(model);
-    } else {
-        self.model = model;
-    }
-
-    self.addAdvancedWhereClause = function (advancedWhereClauses) {
-        if (_.isEmpty(advancedWhereClauses)) {
-            return;
-        }
-        console.error('Adding ' + advancedWhereClauses);
-    };
-
-    self.addDefaultFilter = function (filterValue) {
-        if (_.isEmpty(filterValue)) {
-            return;
-        }
-
-        if (_.isEmpty(self.model.defaultFilter)) {
-            throw 'default filter value is used but no default filter is defined';
-        }
-
-        var defaultField = new Field(self.model.defaultFilter, model);
-
-        var filterComparison = new FilterComparison();
-        filterComparison.left = defaultField.toSql();
-        filterComparison.right = filterValue;
-        self.clauses.push(filterComparison);
-    };
-};
-
 function queryModelData(model) {
     return new BluebirdPromise(function (resolve, reject) {
         var sql = convertModelToKnexSql(model);
@@ -257,7 +191,6 @@ function queryModelData(model) {
                         return foreignKeys[0] + ' IN ' + parentIDs;
                     }
 
-                    childModel.filter = new Filter();
                     // TODO support runtime filters on child models
                     // See if we can guess the foreignKeys from the first and last step
                     if (childModel.foreignKeys) {

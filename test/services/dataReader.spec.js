@@ -45,6 +45,28 @@ describe('Data Reader Service', function () {
             });
             return service.getData(model);
         });
+        it('should limit 100', function () {
+            model.limit = 100;
+
+            client.query = BluebirdPromise.method(function (sql) {
+                var expected = 'select `t0`.`lastName` as `PersonLastName` ' +
+                    'from `person` as `t0` limit 100';
+                sql.toSql().should.equal(expected);
+                return [];
+            });
+            return service.getData(model);
+        });
+        it('should page', function () {
+            model.limit = 100;
+
+            client.query = BluebirdPromise.method(function (sql) {
+                var expected = 'select `t0`.`lastName` as `PersonLastName` ' +
+                    'from `person` as `t0` limit 100 offset 400';
+                sql.toSql().should.equal(expected);
+                return [];
+            });
+            return service.getData(model, '', 5);
+        });
         it('should query one row', function () {
             client.query = BluebirdPromise.method(function () {
                 return [{
