@@ -27,17 +27,23 @@ exports.mobile = function (req, res) {
 };
 
 exports.searchBody = function (req, res) {
-    function returnHttpResponse(pageResult) {
-        if (pageResult.error) {
-            res.render('page/htmlError.html', pageResult.content);
-        } else if (pageResult.rawFilePath) {
-            res.sendfile(pageResult.rawFilePath);
-        } else {
-            res.render('page/search', pageResult.content);
-        }
-    }
+    service.getLocationByName(req.pageName)
+        .then(function (pageLocation) {
+            if (pageLocation.extension === 'html') {
+                return res.sendfile(pageLocation.rawFilePath);
+            }
 
-    return service.getPageByName(req.pageName).then(returnHttpResponse);
+            service.getDefinition(pageLocation)
+                .then(function (content) {
+                    logger.info(content);
+                    return res.render('page/search', content);
+                });
+        }, function (err) {
+            return res.render('page/htmlError', err);
+        })
+        .catch(function (err) {
+            return res.render('page/htmlError', err);
+        });
 };
 
 exports.htmlBody = function (req, res) {
