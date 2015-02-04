@@ -15,42 +15,6 @@ chai.use(require('chai-as-promised'));
 
 describe('Page Controller', function () {
 
-    describe('promises', function () {
-        function testPromise(id) {
-            return new BluebirdPromise(function (resolve, reject) {
-                console.info('test ' + id);
-                if (id > 3) {
-                    reject('higher than 2');
-                }
-                resolve(id + 1);
-            });
-        }
-
-        function pageDefinition() {
-            function handleReject(reason) {
-                console.warn('failure ' + reason);
-            }
-
-            var id = 0;
-            return testPromise(id)
-                .then(function (id) {
-                    return testPromise(id)
-                        .then(function (id) {
-                            return id;
-                        }, handleReject);
-                }, handleReject);
-        }
-
-        it('should run Promises', function (done) {
-
-            pageDefinition()
-                .should.be.fulfilled.then(function (foo) {
-                    foo.should.equal(2);
-                })
-                .should.notify(done);
-        });
-    });
-
     describe('pageDefinition', function () {
         var controller, res,
             req = {
@@ -66,20 +30,6 @@ describe('Page Controller', function () {
                 '../services/pageService': pageService,
                 '../services/modelService': modelService
             });
-        });
-
-        it('should send raw file', function (done) {
-            var rawFilePath = './raw/file';
-            pageService.getLocationByName = BluebirdPromise.method(function () {
-                return {
-                    extension: 'js',
-                    rawFilePath: rawFilePath
-                };
-            });
-
-            controller.pageDefinition(req, res).should.be.fulfilled.then(function () {
-                res.sendfile.calledWith(rawFilePath).should.be.true;
-            }).should.notify(done);
         });
 
         it('should render error page', function (done) {
