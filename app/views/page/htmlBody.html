@@ -1,6 +1,6 @@
 <section data-ng-controller="PageController">
     <div id="server-status" class="alert alert-warning" data-ng-show="serverStatus" data-ng-bind="serverStatus"></div>
-    <div id="server-error" class="alert alert-danger" data-ng-show="serverError" data-ng-bind="serverError"
+    <div id="server-error" class="alert alert-danger" data-ng-show="serverError" data-ng-bind-html="serverError"
          data-spy="affix-bottom"></div>
     <div id="static-content" data-ng-show="staticContent" data-ng-bind="staticContent"></div>
     <!--<div id="toc" class="col-sm-2 hidden-xs">-->
