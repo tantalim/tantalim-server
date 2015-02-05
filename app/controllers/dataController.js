@@ -6,8 +6,8 @@ var modelService = require('../services/pageService'),
     logger = require('../logger/default').main;
 
 function errorFullResponse(res, err) {
-    logger.error('Handling errorResponse in dataController');
-    logger.error(err.message);
+    logger.info('Handling errorResponse in dataController');
+    logger.info(JSON.stringify(err));
     return res.jsonp({error: err.toString()});
 }
 

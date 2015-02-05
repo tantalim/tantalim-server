@@ -46,7 +46,7 @@ describe('Data Controller', function () {
             };
 
             this.controller = proxyquire(configAppRoot + 'controllers/dataController', {
-                '../services/modelService': modelService,
+                '../services/pageService': modelService,
                 '../services/modelSaver': modelSaver
             });
         });
@@ -90,5 +90,38 @@ describe('Data Controller', function () {
             });
         });
     });
-})
-;
+
+    describe('query', function () {
+        this.mockResponse = {
+            jsonp: sinon.spy()
+        };
+
+        var pageService = {
+
+        };
+
+        var reader = {
+
+        };
+
+        beforeEach(function () {
+            this.controller = proxyquire(configAppRoot + 'controllers/dataController', {
+                '../services/pageService': pageService,
+                '../services/dataReader': reader
+            });
+        });
+
+        it('should fail to read data', function () {
+            var res = this.mockResponse;
+            var req = {
+                pageName: 'InvalidData',
+                body: {InvalidData: {insert: []}}
+            };
+            this.controller.query(req, res, function () {
+                var jsonResponse = getJsonResponse(res);
+                return jsonResponse.should.eql({error: 'Invalid data', method: 'saver.save'});
+            });
+        });
+
+    });
+});

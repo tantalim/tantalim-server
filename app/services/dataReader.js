@@ -24,13 +24,14 @@ function postQueryDataConversion(parent_rows, modelDefinition) {
 }
 
 function convertModelToKnexSql(model) {
-    logger.debug('convertModelToKnexSql');
+    logger.debug('starting convertModelToKnexSql for ' + model.name);
 
     var sql = knex(model.basisTable.dbName + ' as t0');
 
     if (_.isArray(model.steps)) {
-        logger.debug('steps');
+        logger.debug('parsing steps');
         _.forEach(model.steps, function (step) {
+            console.info(step);
 
             var joinType = step.required ? '' : 'left';
 
@@ -61,7 +62,7 @@ function convertModelToKnexSql(model) {
     }
 
     if (_.isArray(model.orderBy)) {
-        logger.debug('orderBy');
+        logger.debug('adding orderBy clause');
         _.forEach(model.orderBy, function (orderBy) {
             // Double check that order by is either DESC or ASC.
             // We might consider removing this and just add orderBy since Knex has it's own checking
@@ -71,6 +72,7 @@ function convertModelToKnexSql(model) {
     }
 
     var fields = _.map(model.fields, function (field) {
+        console.info(field);
         return 't' + field.stepCount + '.' + field.basisColumn.dbName + ' AS ' + field.name;
     });
     logger.debug('adding fields');
