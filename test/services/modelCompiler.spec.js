@@ -193,7 +193,7 @@ describe('Model Compiler', function () {
     // TODO Create test for multiple joins A -> B -> C
     it('should add multiple joins', function () {
     });
-    it.only('should add child view', function () {
+    it('should add child view', function () {
         return compiler.compile({
             basisTable: 'Person',
             children: [{

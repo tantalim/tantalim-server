@@ -69,28 +69,10 @@ function compile(modelDefinition) {
 
     }
 
-    function parseAndCompile(modelDefinition) {
-        logger.info('Running parseAndCompile');
-        //logger.debug(modelDefinition);
-        var todo = [];
-
-        if (!modelDefinition.basisTable) {
-            throw Error('basisTable is required');
-        }
-        if (typeof modelDefinition.basisTable === 'string') {
-            logger.info('Building basisTable');
-            if (modelDefinition.basisTable in tables) {
-                var tableDefinition = tables[modelDefinition.basisTable];
-                modelDefinition.basisTable = {
-                    name: tableDefinition.name,
-                    dbName: tableDefinition.dbName
-                };
-            } else {
-                todo.push(pageService.getDefinition(ARTIFACT.TABLE, modelDefinition.basisTable)
-                    .then(function (tableDefinition) {
-                        tables[tableDefinition.name] = tableDefinition;
-                    }));
-            }
+    function buildSteps(modelDefinition, todo) {
+        if (_.isEmpty(modelDefinition.steps)) {
+            logger.info('Model has no steps');
+            return;
         }
 
         var stepCount = 0;
@@ -168,6 +150,33 @@ function compile(modelDefinition) {
                 throw Error('Model steps must define a join: ' + step);
             }
         });
+    }
+
+    function parseAndCompile(modelDefinition) {
+        logger.info('Running parseAndCompile');
+        //logger.debug(modelDefinition);
+        var todo = [];
+
+        if (!modelDefinition.basisTable) {
+            throw Error('basisTable is required');
+        }
+        if (typeof modelDefinition.basisTable === 'string') {
+            logger.info('Building basisTable');
+            if (modelDefinition.basisTable in tables) {
+                var tableDefinition = tables[modelDefinition.basisTable];
+                modelDefinition.basisTable = {
+                    name: tableDefinition.name,
+                    dbName: tableDefinition.dbName
+                };
+            } else {
+                todo.push(pageService.getDefinition(ARTIFACT.TABLE, modelDefinition.basisTable)
+                    .then(function (tableDefinition) {
+                        tables[tableDefinition.name] = tableDefinition;
+                    }));
+            }
+        }
+
+        buildSteps(modelDefinition, todo);
 
         if (modelDefinition.children) {
             logger.info('Parsing children');
