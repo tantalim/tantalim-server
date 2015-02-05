@@ -14,7 +14,7 @@ function compile(modelDefinition) {
 
     function parseAndCompile(modelDefinition) {
         logger.info('Running parseAndCompile');
-        console.log(modelDefinition);
+        //logger.debug(modelDefinition);
         var todo = [];
 
         if (!modelDefinition.basisTable) {
@@ -29,7 +29,7 @@ function compile(modelDefinition) {
                     dbName: tableDefinition.dbName
                 };
             } else {
-                console.info(ARTIFACT);
+                //console.info(ARTIFACT);
                 todo.push(pageService.getDefinition(ARTIFACT.TABLE, modelDefinition.basisTable)
                     .then(function (tableDefinition) {
                         tables[tableDefinition.name] = tableDefinition;
@@ -125,7 +125,6 @@ function compile(modelDefinition) {
                                 return step;
                             }
                         });
-                        console.log(step);
                         field.basisTable = step.join.table.name;
                         field.stepCount = step.stepCount;
                     }

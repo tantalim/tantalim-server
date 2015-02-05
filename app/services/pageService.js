@@ -17,7 +17,7 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
     // TODO Double check variables for injection
     return new BluebirdPromise(function (resolve, reject) {
         var file = 'tantalim_modules/' + moduleName + '/src/' + artifactType + 's/' + artifactName + '.json';
-        logger.debug('reading file from ' + file);
+        //logger.debug('reading file from ' + file);
         return fs.readFileAsync(file, 'utf8')
             .then(function (data) {
                 var jsonData = JSON.parse(data);
@@ -50,7 +50,7 @@ function getArtifactFromCache(artifactType, moduleName, artifactName) {
     return new BluebirdPromise(function (resolve, reject) {
         var dir = 'tantalim_modules/' + moduleName + '/dist/' + artifactType + 's/';
         var file = dir + artifactName + '.json';
-        logger.debug('reading file from ' + file);
+        //logger.debug('reading file from ' + file);
         return fs.readFileAsync(file, 'utf8')
             .then(function (data) {
                 resolve(JSON.parse(data));

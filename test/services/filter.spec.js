@@ -13,19 +13,28 @@ describe('Filter', function () {
 
     var modelColumns = [
         {
-            fieldName: 'TableID',
-            sql: 'id',
-            dataType: 'Integer'
+            name: 'TableID',
+            basisColumn: {
+                dbName: 'id'
+            },
+            dataType: 'Integer',
+            stepCount: 0
         },
         {
-            fieldName: 'CreatedDate',
-            sql: 'created_date',
-            dataType: 'Date'
+            name: 'CreatedDate',
+            basisColumn: {
+                dbName: 'created_date'
+            },
+            dataType: 'Date',
+            stepCount: 0
         },
         {
-            fieldName: 'TableName',
-            sql: 'name',
-            dataType: 'String'
+            name: 'TableName',
+            basisColumn: {
+                dbName: 'name'
+            },
+            dataType: 'String',
+            stepCount: 0
         }
     ];
 
@@ -49,51 +58,51 @@ describe('Filter', function () {
 
         it('should filter equals', function () {
             applyFilter('TableName = Person');
-            expect('`name` = \'Person\'');
+            expect('`t0`.`name` = \'Person\'');
         });
     });
 
     describe('strings', function () {
         it('should filter begins with', function () {
             applyFilter('TableName BeginsWith Foo');
-            expect('`name` like \'Foo%\'');
+            expect('`t0`.`name` like \'Foo%\'');
         });
         it('should filter contains', function () {
             applyFilter('TableName Contains Foo');
-            expect('`name` like \'%Foo%\'');
+            expect('`t0`.`name` like \'%Foo%\'');
         });
         it('should filter ends with', function () {
             applyFilter('TableName EndsWith Foo');
-            expect('`name` like \'%Foo\'');
+            expect('`t0`.`name` like \'%Foo\'');
         });
     });
 
     describe('numbers', function () {
         it('should parse IN clause', function () {
             applyFilter('TableID IN 1,2');
-            expect('`id` in (\'1\', \'2\')');
+            expect('`t0`.`id` in (\'1\', \'2\')');
         });
     });
 
     describe('dates', function () {
         it('should filter IsPast', function () {
             applyFilter('CreatedDate Before NOW');
-            expect('`created_date` < NOW()');
+            expect('`t0`.`created_date` < NOW()');
         });
         it('should filter more than 2 days from now', function () {
             applyFilter('CreatedDate After 2d');
-            expect('`created_date` > DATE_ADD(NOW(), INTERVAL 2 DAY)');
+            expect('`t0`.`created_date` > DATE_ADD(NOW(), INTERVAL 2 DAY)');
         });
         it('should filter after 12 months ago', function () {
             applyFilter('CreatedDate After -12MONTHS');
-            expect('`created_date` > DATE_SUB(NOW(), INTERVAL 12 MONTH)');
+            expect('`t0`.`created_date` > DATE_SUB(NOW(), INTERVAL 12 MONTH)');
         });
     });
 
     describe('complex', function () {
         it('should parse AND clause', function () {
             applyFilter('TableName = Person AND TableID > 2');
-            expect('`name` = \'Person\' and `id` > \'2\'');
+            expect('`t0`.`name` = \'Person\' and `t0`.`id` > \'2\'');
         });
     });
 });
