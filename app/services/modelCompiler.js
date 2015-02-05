@@ -12,6 +12,14 @@ function compile(modelDefinition) {
 
     logger.info('Starting compile', modelDefinition.name);
 
+    function findField(fields, fieldName) {
+        return _.find(fields, function (field) {
+            if (fieldName === field.name) {
+                return field;
+            }
+        });
+    }
+
     function mapFields(modelDefinition) {
         if (!modelDefinition.fields) {
             logger.warn('Model had no fields');
@@ -181,6 +189,17 @@ function compile(modelDefinition) {
         if (modelDefinition.children) {
             logger.info('Parsing children');
             _.forEach(modelDefinition.children, function (child) {
+                var link = child.parentLink;
+                if (_.isEmpty(link)) {
+                    throw Error('Child model ' + child.name + ' must define a parentLink');
+                } else {
+                    if (!findField(modelDefinition.fields, link.parentField)) {
+                        throw Error('Parent model ' + modelDefinition.name + ' is missing parentField named ' + link.parentField);
+                    }
+                    if (!findField(child.fields, link.childField)) {
+                        throw Error('Child model ' + child.name + ' is missing childField named ' + link.childField);
+                    }
+                }
                 parseAndCompile(child);
             });
         }

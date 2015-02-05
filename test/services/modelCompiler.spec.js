@@ -193,16 +193,53 @@ describe('Model Compiler', function () {
     // TODO Create test for multiple joins A -> B -> C
     it('should add multiple joins', function () {
     });
-    it('should add child view', function () {
+    it('should require parentLink', function () {
         return compiler.compile({
             basisTable: 'Person',
             children: [{
                 name: 'Child',
+                basisTable: 'Person'
+            }]
+        }).should.be.rejectedWith(Error, 'Child model Child must define a parentLink');
+    });
+    it('should error with invalid parentLink columns', function () {
+        return compiler.compile({
+            name: 'Person',
+            basisTable: 'Person',
+            children: [{
+                name: 'Child',
                 basisTable: 'Person',
+                parentLink: {
+                    parentField: 'FieldNotHere',
+                    childField: 'FieldNotHere'
+                }
+            }]
+        }).should.be.rejectedWith(Error, 'Parent model Person is missing parentField named FieldNotHere');
+    });
+    it('should add child view', function () {
+        return compiler.compile({
+            basisTable: 'Person',
+            fields: [
+                {
+                    name: 'PersonPersonID',
+                    basisColumn: 'PersonID'
+                }
+            ],
+            children: [{
+                name: 'Child',
+                basisTable: 'Person',
+                parentLink: {
+                    parentField: 'PersonPersonID',
+                    childField: 'ChildParentID'
+                },
                 fields: [
                     {
                         name: 'ChildName',
                         basisColumn: 'Name'
+                    },
+                    {
+                        name: 'ChildParentID',
+                        basisColumn: 'ParentID'
                     }
                 ]
             }]
@@ -211,11 +248,33 @@ describe('Model Compiler', function () {
                     name: 'Person',
                     dbName: 'person'
                 },
+                instanceID: {
+                    name: 'PersonPersonID',
+                    stepCount: 0,
+                    basisTable: 'Person',
+                    basisColumn: {
+                        name: 'PersonID'
+                    }
+                },
+                fields: [
+                    {
+                        name: 'PersonPersonID',
+                        stepCount: 0,
+                        basisTable: 'Person',
+                        basisColumn: {
+                            name: 'PersonID'
+                        }
+                    }
+                ],
                 children: [{
                     name: 'Child',
                     basisTable: {
                         name: 'Person',
                         dbName: 'person'
+                    },
+                    parentLink: {
+                        parentField: 'PersonPersonID',
+                        childField: 'ChildParentID'
                     },
                     fields: [
                         {
@@ -225,7 +284,16 @@ describe('Model Compiler', function () {
                             basisColumn: {
                                 name: 'Name'
                             }
+                        },
+                        {
+                            name: 'ChildParentID',
+                            stepCount: 0,
+                            basisTable: 'Person',
+                            basisColumn: {
+                                name: 'ParentID'
+                            }
                         }
+
                     ]
                 }]
             });

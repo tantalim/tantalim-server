@@ -152,7 +152,6 @@ describe('Data Reader Service', function () {
 
             return service.getData(model);
         });
-
         it('should left join with string to table', function () {
             model.steps[0].join.columns[0].fromText = '1';
             delete model.steps[0].join.columns[0].from;
@@ -171,6 +170,7 @@ describe('Data Reader Service', function () {
 
         beforeEach(function () {
             model = {
+                name: 'Person',
                 basisTable: {dbName: 'person'},
                 instanceID: 'PersonID',
                 fields: [
@@ -180,13 +180,12 @@ describe('Data Reader Service', function () {
                 children: [
                     {
                         name: 'Child',
-                        foreignKeys: [{
+                        parentLink: {
                             parentField: 'PersonID',
                             childField: 'ParentID'
-                        }],
+                        },
                         basisTable: {dbName: 'child'},
                         fields: [
-                            //{name: 'ChildID', basisColumn: {dbName: 'id'}, stepCount: 0},
                             {name: 'ParentID', basisColumn: {dbName: 'parentID'}, stepCount: 0},
                             {name: 'ChildName', basisColumn: {dbName: 'name'}, stepCount: 0}
                         ]
@@ -276,39 +275,19 @@ describe('Data Reader Service', function () {
                 children: [
                     {
                         name: 'Child',
-                        foreignKeys: [{
+                        parentLink: {
                             parentField: 'PersonName',
                             childField: 'ChildName'
-                        }],
-                        steps: [
-                            {
-                                name: '20',
-                                required: true,
-                                join: {
-                                    table: {
-                                        dbName: 'company'
-                                    },
-                                    columns: [{
-                                        from: {
-                                            dbName: 'companyID'
-                                        },
-                                        to: {
-                                            dbName: 'id'
-                                        }
-                                    }]
-                                },
-                                stepCount: 1
-                            }
-                        ],
+                        },
                         basisTable: {dbName: 'child'},
                         fields: [{name: 'ChildName', basisColumn: {dbName: 'name'}, stepCount: 0}],
                         children: [
                             {
                                 name: 'Grandchild',
-                                foreignKeys: [{
+                                parentLink: {
                                     parentField: 'ChildName',
                                     childField: 'GrandchildName'
-                                }],
+                                },
                                 basisTable: {dbName: 'grandchild'},
                                 fields: [{name: 'GrandchildName', basisColumn: {dbName: 'name'}, stepCount: 0}]
                             }
@@ -331,47 +310,6 @@ describe('Data Reader Service', function () {
                     }];
                 }
             });
-        });
-
-        it.skip('should join to company and industry', function () {
-            var model = {
-                basisTable: {dbName: 'person'},
-                fields: [
-                    {fieldName: 'PersonName', basisColumn: {dbName: 'name'}},
-                    {fieldName: 'PersonCompanyName', basisColumn: {dbName: 'name'}, fieldStepID: '20'},
-                    {fieldName: 'PersonCompanyIndustryName', basisColumn: {dbName: 'name'}, fieldStepID: '21'}
-                ],
-                steps: [
-                    {
-                        stepStepID: '20',
-                        stepPreviousStepID: null,
-                        joinToTableSql: 'company',
-                        joinRequired: '1',
-                        joinColumns: [
-                            {fromColSql: 'companyID', toColSql: 'id'}
-                        ]
-                    },
-                    {
-                        stepStepID: '21',
-                        stepPreviousStepID: '20',
-                        joinToTableSql: 'industry',
-                        joinRequired: '0',
-                        joinColumns: [
-                            {fromColSql: 'industryCode', toColSql: 'code'}
-                        ]
-                    }
-                ]
-            };
-
-            var sql = service.getModelSql(model);
-            var expected = 'select ' +
-                '`t0`.`name` as `PersonName`, ' +
-                '`t1`.`name` as `PersonCompanyName`, ' +
-                '`t2`.`name` as `PersonCompanyIndustryName` ' +
-                'from `person` as `t0` ' +
-                'inner join `company` as `t1` on `t1`.`id` = `t0`.`companyID` ' +
-                'left join `industry` as `t2` on `t2`.`code` = `t1`.`industryCode`';
-            sql.toSql().should.equal(expected);
         });
 
         it('should query data', function () {

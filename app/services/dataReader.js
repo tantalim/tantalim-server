@@ -25,14 +25,13 @@ function postQueryDataConversion(parent_rows, modelDefinition) {
 
 function convertModelToKnexSql(model) {
     logger.debug('starting convertModelToKnexSql for ' + model.name);
+    //logger.debug(JSON.stringify(model));
 
     var sql = knex(model.basisTable.dbName + ' as t0');
 
     if (_.isArray(model.steps)) {
         logger.debug('parsing steps');
         _.forEach(model.steps, function (step) {
-            console.info(step);
-
             var joinType = step.required ? '' : 'left';
 
             var tableSyntax = step.join.table.dbName + ' as t' + step.stepCount;
@@ -72,7 +71,6 @@ function convertModelToKnexSql(model) {
     }
 
     var fields = _.map(model.fields, function (field) {
-        console.info(field);
         return 't' + field.stepCount + '.' + field.basisColumn.dbName + ' AS ' + field.name;
     });
     logger.debug('adding fields');
@@ -82,14 +80,21 @@ function convertModelToKnexSql(model) {
 }
 
 function addKeysToData(data, instanceID, foreignKeyName) {
-    logger.debug('starting addKeysToData');
+    logger.debug('starting addKeysToData for ' + data.length + ' rows where instanceID = ' + JSON.stringify(instanceID) +
+    ' and foreignKey = ' + JSON.stringify(foreignKeyName));
+
+    var instanceIdName = (function () {
+        if (!instanceID) return undefined;
+        if (typeof instanceID === 'string') return instanceID;
+        return instanceID.name;
+    })();
 
     return _.map(data, function (row) {
         var newRow = {
             data: row
         };
-        if (instanceID && row[instanceID]) {
-            newRow.id = row[instanceID];
+        if (instanceIdName && row[instanceIdName]) {
+            newRow.id = row[instanceIdName];
         }
         if (foreignKeyName && row[foreignKeyName]) {
             newRow.foreignKey = row[foreignKeyName];
@@ -100,19 +105,25 @@ function addKeysToData(data, instanceID, foreignKeyName) {
 
 function addChildrenToParent(parents, childModel, children) {
     var modelName = childModel.name;
-    logger.debug('starting addChildrenToParent from ' + modelName);
+    logger.debug('mapping ' + children.length + ' rows from ' + modelName + ' to parent model');
+
     _.forEach(parents, function (parent) {
         if (parent.children === undefined) {
             parent.children = {};
         }
 
-        var foreignKey = _.isArray(childModel.foreignKeys) ? childModel.foreignKeys[0] : childModel.foreignKeys;
-        if (foreignKey) {
-            parent.children[modelName] = _.filter(children, function (child) {
-                return parent.data[foreignKey.parentField] === child.data[foreignKey.childField];
+        var parentLink = childModel.parentLink;
+        if (parentLink) {
+            var twoGroups = _.partition(children, function (child) {
+                return parent.data[parentLink.parentField] === child.data[parentLink.childField];
             });
+            parent.children[modelName] = twoGroups[0];
+            children = twoGroups[1];
         }
     });
+    if (children.length > 0) {
+        logger.warn('failed to map ' + children.length + ' children rows ');
+    }
 }
 
 function queryModelData(model) {
@@ -152,26 +163,10 @@ function queryModelData(model) {
                 // Begin cascading queries for all child models
                 async.each(model.children, function (childModel, childModelDone) {
 
-                    function createForeignKeyJoinFilter(childModel, rawData) {
-                        var foreignKeys = _.map(childModel.foreignKeys, function (foreignKey) {
-                            return foreignKey.childField;
-                        });
-
-                        var parentIDs = _.flatten(_.map(rawData, function (parentRow) {
-                            return _.map(childModel.foreignKeys, function (foreignKey) {
-                                return parentRow[foreignKey.parentField];
-                            });
-                        }));
-
-                        // TODO support multiple foreign key joins when knex supports them
-                        return foreignKeys[0] + ' IN ' + parentIDs;
-                    }
-
-                    // TODO support runtime filters on child models
-                    // See if we can guess the foreignKeys from the first and last step
-                    if (childModel.foreignKeys) {
-                        childModel.filter = createForeignKeyJoinFilter(childModel, rawData);
-                    }
+                    var parentIDs = _.flatten(_.map(rawData, function (parentRow) {
+                        return parentRow[childModel.parentLink.parentField];
+                    }));
+                    childModel.filter = childModel.parentLink.childField + ' IN ' + parentIDs;
 
                     queryModelData(childModel)
                         .then(function (childResults) {
