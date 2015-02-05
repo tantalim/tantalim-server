@@ -53,19 +53,10 @@ exports.mobile = function (req, res) {
 };
 
 exports.searchBody = function (req, res) {
-    return service.getLocationByName(req.pageName)
-        .then(function (pageLocation) {
-            if (pageLocation.extension === 'html') {
-                return res.sendfile(pageLocation.rawFilePath);
-            }
-
-            service.getDefinition(pageLocation)
-                .then(function (content) {
-                    logger.info(content);
-                    return res.render('page/search', content);
-                });
-        }, function (err) {
-            return res.render('page/htmlError', err);
+    return service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
+        .then(function (content) {
+            logger.info(content);
+            return res.render('page/search', content);
         })
         .catch(function (err) {
             return res.render('page/htmlError', err);
