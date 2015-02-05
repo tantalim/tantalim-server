@@ -35,7 +35,7 @@ module.exports = function (grunt) {
             options: {
                 reporter: 'spec' // spec or dot
             },
-            src: ['test/**/*.js']
+            src: ['test/**/*.spec.js']
         }
     });
 
@@ -48,6 +48,7 @@ module.exports = function (grunt) {
 
     //Default task(s).
     grunt.registerTask('default', ['jshint', 'watch']);
+    grunt.registerTask('default', ['watch']);
 
     //grunt.registerTask('test', ['jshint', 'mochaTest']);
     // Running jshint during CI builds is ideal

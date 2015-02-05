@@ -16,7 +16,11 @@ describe('Data Reader Service', function () {
         var model;
 
         beforeEach(function () {
-            var lastName = {'fieldName': 'PersonLastName', 'basisColumn': {'dbName': 'lastName'}};
+            var lastName = {
+                name: 'PersonLastName',
+                basisColumn: {dbName: 'lastName'},
+                stepCount: 0
+            };
 
             model = {
                 basisTable: {dbName: 'person'},
@@ -86,9 +90,9 @@ describe('Data Reader Service', function () {
         var model = {
             basisTable: {dbName: 'person'},
             fields: [{
-                'fieldName': 'BooleanField',
-                'dataType': 'Boolean',
-                'basisColumn': {'dbName': 'booleanField'}
+                name: 'BooleanField',
+                dataType: 'Boolean',
+                basisColumn: {dbName: 'booleanField'}
             }]
         };
 
@@ -108,19 +112,32 @@ describe('Data Reader Service', function () {
         var model;
 
         beforeEach(function () {
-            var lastName = {'fieldName': 'PersonLastName', 'basisColumn': {'dbName': 'lastName'}};
+            var lastName = {
+                name: 'PersonLastName',
+                basisColumn: {dbName: 'lastName'},
+                stepCount: 0
+            };
 
             model = {
                 basisTable: {dbName: 'person'},
                 fields: [lastName],
                 steps: [{
-                    stepStepID: 101,
-                    joinRequired: false,
-                    joinToTableSql: 'department',
-                    joinColumns: [{
-                        fromColSql: 'departmentID',
-                        toColSql: 'id'
-                    }]
+                    name: '101',
+                    required: false,
+                    join: {
+                        table: {
+                            dbName: 'department'
+                        },
+                        columns: [{
+                            from: {
+                                dbName: 'departmentID'
+                            },
+                            to: {
+                                dbName: 'id'
+                            }
+                        }]
+                    },
+                    stepCount: 1
                 }]
             };
         });
@@ -137,7 +154,8 @@ describe('Data Reader Service', function () {
         });
 
         it('should left join with string to table', function () {
-            model.steps[0].joinColumns[0].fromText = '1';
+            model.steps[0].join.columns[0].fromText = '1';
+            delete model.steps[0].join.columns[0].from;
             client.query = BluebirdPromise.method(function (sql) {
                 var expected = 'select `t0`.`lastName` as `PersonLastName` ' +
                     'from `person` as `t0` left join `department` as `t1` on `t1`.`id` = \'1\'';
@@ -156,23 +174,21 @@ describe('Data Reader Service', function () {
                 basisTable: {dbName: 'person'},
                 instanceID: 'PersonID',
                 fields: [
-                    {'fieldName': 'PersonID', 'basisColumn': {'dbName': 'id'}},
-                    {'fieldName': 'PersonName', 'basisColumn': {'dbName': 'name'}}
+                    {name: 'PersonID', basisColumn: {dbName: 'id'}, stepCount: 0},
+                    {name: 'PersonName', basisColumn: {dbName: 'name'}, stepCount: 0}
                 ],
                 children: [
                     {
-                        data: {
-                            modelName: 'Child'
-                        },
+                        name: 'Child',
                         foreignKeys: [{
                             parentField: 'PersonID',
                             childField: 'ParentID'
                         }],
                         basisTable: {dbName: 'child'},
                         fields: [
-                            //{'fieldName': 'ChildID', 'basisColumn': {'dbName': 'id'}},
-                            {'fieldName': 'ParentID', 'basisColumn': {'dbName': 'parentID'}},
-                            {'fieldName': 'ChildName', 'basisColumn': {'dbName': 'name'}}
+                            //{name: 'ChildID', basisColumn: {dbName: 'id'}, stepCount: 0},
+                            {name: 'ParentID', basisColumn: {dbName: 'parentID'}, stepCount: 0},
+                            {name: 'ChildName', basisColumn: {dbName: 'name'}, stepCount: 0}
                         ]
                     }]
             };
@@ -256,40 +272,45 @@ describe('Data Reader Service', function () {
         beforeEach(function () {
             model = {
                 basisTable: {dbName: 'person'},
-                fields: [{'fieldName': 'PersonName', 'basisColumn': {'dbName': 'name'}}],
+                fields: [{name: 'PersonName', basisColumn: {dbName: 'name'}, stepCount: 0}],
                 children: [
                     {
-                        data: {
-                            modelName: 'Child'
-                        },
+                        name: 'Child',
                         foreignKeys: [{
                             parentField: 'PersonName',
                             childField: 'ChildName'
                         }],
                         steps: [
                             {
-                                stepStepID: '20',
-                                stepPreviousStepID: null,
-                                joinToTableSql: 'company',
-                                joinRequired: '1',
-                                joinColumns: [
-                                    {fromColSql: 'companyID', toColSql: 'id'}
-                                ]
+                                name: '20',
+                                required: true,
+                                join: {
+                                    table: {
+                                        dbName: 'company'
+                                    },
+                                    columns: [{
+                                        from: {
+                                            dbName: 'companyID'
+                                        },
+                                        to: {
+                                            dbName: 'id'
+                                        }
+                                    }]
+                                },
+                                stepCount: 1
                             }
                         ],
                         basisTable: {dbName: 'child'},
-                        fields: [{'fieldName': 'ChildName', 'basisColumn': {'dbName': 'name'}}],
+                        fields: [{name: 'ChildName', basisColumn: {dbName: 'name'}, stepCount: 0}],
                         children: [
                             {
-                                data: {
-                                    modelName: 'Grandchild'
-                                },
+                                name: 'Grandchild',
                                 foreignKeys: [{
                                     parentField: 'ChildName',
                                     childField: 'GrandchildName'
                                 }],
                                 basisTable: {dbName: 'grandchild'},
-                                fields: [{'fieldName': 'GrandchildName', 'basisColumn': {'dbName': 'name'}}]
+                                fields: [{name: 'GrandchildName', basisColumn: {dbName: 'name'}, stepCount: 0}]
                             }
                         ]
                     }]

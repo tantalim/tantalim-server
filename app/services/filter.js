@@ -48,15 +48,14 @@ function formatDate(dateString) {
 
 function toSql(fieldName, fields) {
     var field = _.find(fields, function(field) {
-        if (field.fieldName === fieldName) {
+        if (field.name === fieldName) {
             return field;
         }
     });
+    logger.debug('Found field ' + fieldName, JSON.stringify(field));
+
     if (field) {
-        if (field.sql) {
-            return field.sql;
-        }
-        throw Error('sql is not set on field ' + field.toSql());
+        return 't' + field.stepCount + '.' + field.basisColumn.dbName;
     }
     throw Error('Could not find field named ' + fieldName);
 }
@@ -66,6 +65,7 @@ function apply(filterString, sql, fields) {
         return;
     }
 
+    logger.debug('applying filterString');
     var andMatch = filterString.match(patternAndOr);
     if (andMatch) {
         logger.debug('andMatch: ', andMatch);

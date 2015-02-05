@@ -10,7 +10,7 @@ var config = require('../config'),
 chai.Should();
 chai.use(require('chai-as-promised'));
 
-describe.only('Model Compiler', function () {
+describe('Model Compiler', function () {
     var compiler;
 
     beforeEach(function () {
@@ -30,6 +30,7 @@ describe.only('Model Compiler', function () {
         joins: [{
             name: 'Parent',
             table: 'Person',
+            required: false,
             columns: [{
                 from: 'ParentID',
                 to: 'PersonID'
@@ -61,20 +62,22 @@ describe.only('Model Compiler', function () {
     });
     it('should error if column is missing', function () {
         return compiler.compile({
+            name: 'PersonModel',
             basisTable: 'Person',
             fields: [
                 {
-                    basisColumn: 'NOT_HERE'
+                    name: 'PersonNotHere',
+                    basisColumn: 'NotHere'
                 },
             ]
-        }).should.be.rejectedWith(Error, 'Could not find column');
+        }).should.be.rejectedWith(Error, 'Could not find basis column for PersonNotHere on PersonModel');
     });
     it('should map column', function () {
         return compiler.compile({
             basisTable: 'Person',
             fields: [
                 {
-                    fieldName: 'PersonName',
+                    name: 'PersonName',
                     basisColumn: 'Name'
                 }
             ]
@@ -85,7 +88,7 @@ describe.only('Model Compiler', function () {
                 },
                 fields: [
                     {
-                        fieldName: 'PersonName',
+                        name: 'PersonName',
                         basisTable: 'Person',
                         stepCount: 0,
                         basisColumn: {
@@ -95,13 +98,12 @@ describe.only('Model Compiler', function () {
                 ]
             });
     });
-    // TODO Get the column syntax right
-    it.skip('should add join', function () {
+    it('should add join', function () {
         return compiler.compile({
             basisTable: 'Person',
             fields: [
                 {
-                    fieldName: 'ParentName',
+                    name: 'ParentName',
                     basisColumn: 'Name',
                     step: 'p'
                 }
@@ -109,7 +111,8 @@ describe.only('Model Compiler', function () {
             steps: [
                 {
                     name: 'p',
-                    join: 'Parent'
+                    join: 'Parent',
+                    required: true
                 }
             ]
         }).should.eventually.eql({
@@ -120,6 +123,7 @@ describe.only('Model Compiler', function () {
                 steps: [
                     {
                         name: 'p',
+                        required: true,
                         join: {
                             name: 'Parent',
                             table: {
@@ -128,7 +132,7 @@ describe.only('Model Compiler', function () {
                             },
                             columns: [{
                                 from: {
-                                    name: 'PersonID'
+                                    name: 'ParentID'
                                 },
                                 to: {
                                     name: 'PersonID'
@@ -140,7 +144,7 @@ describe.only('Model Compiler', function () {
                 ],
                 fields: [
                     {
-                        fieldName: 'ParentName',
+                        name: 'ParentName',
                         basisTable: 'Person',
                         step: 'p',
                         stepCount: 1,
@@ -154,4 +158,5 @@ describe.only('Model Compiler', function () {
     // TODO Create test for multiple joins A -> B -> C
     it.skip('should add multiple joins', function () {
     });
+
 });
