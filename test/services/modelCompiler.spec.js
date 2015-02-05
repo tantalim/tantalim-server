@@ -22,6 +22,7 @@ describe('Model Compiler', function () {
     var PersonTable = {
         name: 'Person',
         dbName: 'person',
+        primaryKey: 'PersonID',
         columns: [
             {name: 'PersonID'},
             {name: 'Name'},
@@ -98,6 +99,40 @@ describe('Model Compiler', function () {
                 ]
             });
     });
+    it('should add instanceID', function () {
+        return compiler.compile({
+            basisTable: 'Person',
+            fields: [
+                {
+                    name: 'PersonPersonID',
+                    basisColumn: 'PersonID'
+                }
+            ]
+        }).should.eventually.eql({
+                basisTable: {
+                    name: 'Person',
+                    dbName: 'person'
+                },
+                instanceID: {
+                    name: 'PersonPersonID',
+                    basisTable: 'Person',
+                    stepCount: 0,
+                    basisColumn: {
+                        name: 'PersonID'
+                    }
+                },
+                fields: [
+                    {
+                        name: 'PersonPersonID',
+                        basisTable: 'Person',
+                        stepCount: 0,
+                        basisColumn: {
+                            name: 'PersonID'
+                        }
+                    }
+                ]
+            });
+    });
     it('should add join', function () {
         return compiler.compile({
             basisTable: 'Person',
@@ -157,6 +192,27 @@ describe('Model Compiler', function () {
     });
     // TODO Create test for multiple joins A -> B -> C
     it.skip('should add multiple joins', function () {
+    });
+    it('should have child view', function () {
+        return compiler.compile({
+            basisTable: 'Person',
+            children: [{
+                name: 'Child',
+                basisTable: 'Person'
+            }]
+        }).should.eventually.eql({
+                basisTable: {
+                    name: 'Person',
+                    dbName: 'person'
+                },
+                children: [{
+                    name: 'Child',
+                    basisTable: {
+                        name: 'Person',
+                        dbName: 'person'
+                    }
+                }]
+            });
     });
 
 });

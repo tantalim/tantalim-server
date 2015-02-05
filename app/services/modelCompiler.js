@@ -12,6 +12,62 @@ function compile(modelDefinition) {
 
     logger.info('Starting compile', modelDefinition.name);
 
+    function mapFields() {
+        logger.info('Building fields');
+
+        function findColumn(tableName, columnName) {
+            return _.find(tables[tableName].columns, function (column) {
+                if (column.name === columnName) {
+                    return column;
+                }
+            });
+        }
+
+        var basisTableName = modelDefinition.basisTable.name;
+
+        _.forEach(modelDefinition.fields, function (field) {
+            if (typeof field.basisColumn === 'string') {
+                field.basisTable = basisTableName;
+                field.stepCount = 0;
+                if (field.step) {
+                    var step = _.find(modelDefinition.steps, function (step) {
+                        if (step.name === field.step) {
+                            return step;
+                        }
+                    });
+                    field.basisTable = step.join.table.name;
+                    field.stepCount = step.stepCount;
+                }
+
+                var basisColumn = _.find(tables[field.basisTable].columns, function (column) {
+                    if (column.name === field.basisColumn) {
+                        return column;
+                    }
+                });
+                if (basisColumn === undefined) {
+                    throw Error('Could not find basis column for ' + field.name + ' on ' + modelDefinition.name);
+                }
+                field.basisColumn = basisColumn;
+            }
+        });
+
+        var primaryKey = findColumn(basisTableName, tables[basisTableName].primaryKey);
+        if (primaryKey) {
+            var instanceID = _.find(modelDefinition.fields, function (field) {
+                if (field.basisColumn && field.basisColumn.name === primaryKey.name) {
+                    return field;
+                }
+            });
+            if (instanceID) {
+                modelDefinition.instanceID = instanceID;
+            } else {
+                logger.warn('Field matching primaryKey column wasn\'t included in the model: ' + primaryKey.name);
+            }
+        }
+
+
+    }
+
     function parseAndCompile(modelDefinition) {
         logger.info('Running parseAndCompile');
         //logger.debug(modelDefinition);
@@ -29,7 +85,6 @@ function compile(modelDefinition) {
                     dbName: tableDefinition.dbName
                 };
             } else {
-                //console.info(ARTIFACT);
                 todo.push(pageService.getDefinition(ARTIFACT.TABLE, modelDefinition.basisTable)
                     .then(function (tableDefinition) {
                         tables[tableDefinition.name] = tableDefinition;
@@ -113,33 +168,15 @@ function compile(modelDefinition) {
             }
         });
 
-        if (todo.length === 0) {
-            logger.info('Building fields');
-            _.forEach(modelDefinition.fields, function (field) {
-                if (typeof field.basisColumn === 'string') {
-                    field.basisTable = modelDefinition.basisTable.name;
-                    field.stepCount = 0;
-                    if (field.step) {
-                        var step = _.find(modelDefinition.steps, function (step) {
-                            if (step.name === field.step) {
-                                return step;
-                            }
-                        });
-                        field.basisTable = step.join.table.name;
-                        field.stepCount = step.stepCount;
-                    }
-
-                    var basisColumn = _.find(tables[field.basisTable].columns, function (column) {
-                        if (column.name === field.basisColumn) {
-                            return column;
-                        }
-                    });
-                    if (basisColumn === undefined) {
-                        throw Error('Could not find basis column for ' + field.name + ' on ' + modelDefinition.name);
-                    }
-                    field.basisColumn = basisColumn;
-                }
+        if (modelDefinition.children) {
+            logger.info('Parsing children');
+            _.forEach(modelDefinition.children, function (child) {
+                parseAndCompile(child);
             });
+        }
+
+        if (todo.length === 0) {
+            mapFields();
         }
 
         return todo;
