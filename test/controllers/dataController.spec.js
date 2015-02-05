@@ -111,6 +111,10 @@ describe('Data Controller', function () {
             });
         });
 
+        function getJsonResponse(response) {
+            return response.jsonp.args[0][0];
+        }
+
         it('should fail to read data', function () {
             var res = this.mockResponse;
             var req = {
