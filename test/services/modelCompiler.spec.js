@@ -191,14 +191,20 @@ describe('Model Compiler', function () {
             });
     });
     // TODO Create test for multiple joins A -> B -> C
-    it.skip('should add multiple joins', function () {
+    it('should add multiple joins', function () {
     });
-    it('should have child view', function () {
+    it.only('should add child view', function () {
         return compiler.compile({
             basisTable: 'Person',
             children: [{
                 name: 'Child',
-                basisTable: 'Person'
+                basisTable: 'Person',
+                fields: [
+                    {
+                        name: 'ChildName',
+                        basisColumn: 'Name'
+                    }
+                ]
             }]
         }).should.eventually.eql({
                 basisTable: {
@@ -210,7 +216,17 @@ describe('Model Compiler', function () {
                     basisTable: {
                         name: 'Person',
                         dbName: 'person'
-                    }
+                    },
+                    fields: [
+                        {
+                            name: 'ChildName',
+                            stepCount: 0,
+                            basisTable: 'Person',
+                            basisColumn: {
+                                name: 'Name'
+                            }
+                        }
+                    ]
                 }]
             });
     });

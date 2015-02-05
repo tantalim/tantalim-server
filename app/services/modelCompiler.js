@@ -12,8 +12,13 @@ function compile(modelDefinition) {
 
     logger.info('Starting compile', modelDefinition.name);
 
-    function mapFields() {
-        logger.info('Building fields');
+    function mapFields(modelDefinition) {
+        if (!modelDefinition.fields) {
+            logger.warn('Model had no fields');
+            return;
+        }
+
+        logger.info('Building ' + modelDefinition.fields.length + 'fields');
 
         function findColumn(tableName, columnName) {
             return _.find(tables[tableName].columns, function (column) {
@@ -24,7 +29,6 @@ function compile(modelDefinition) {
         }
 
         var basisTableName = modelDefinition.basisTable.name;
-
         _.forEach(modelDefinition.fields, function (field) {
             if (typeof field.basisColumn === 'string') {
                 field.basisTable = basisTableName;
@@ -39,14 +43,11 @@ function compile(modelDefinition) {
                     field.stepCount = step.stepCount;
                 }
 
-                var basisColumn = _.find(tables[field.basisTable].columns, function (column) {
-                    if (column.name === field.basisColumn) {
-                        return column;
-                    }
-                });
-                if (basisColumn === undefined) {
+                var basisColumn = findColumn(field.basisTable, field.basisColumn);
+                if (!basisColumn) {
                     throw Error('Could not find basis column for ' + field.name + ' on ' + modelDefinition.name);
                 }
+                logger.debug('Mapped field: ' + field.name + ' to ' + basisColumn.name);
                 field.basisColumn = basisColumn;
             }
         });
@@ -176,7 +177,7 @@ function compile(modelDefinition) {
         }
 
         if (todo.length === 0) {
-            mapFields();
+            mapFields(modelDefinition);
         }
 
         return todo;
