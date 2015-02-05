@@ -1,9 +1,8 @@
 'use strict';
 
-var logger = require('../logger/default').debug,
-    _ = require('lodash'),
+var logger = require('../logger/default').main,
     BluebirdPromise = require('bluebird'),
-    fs = BluebirdPromise.promisifyAll(require("fs")),
+    fs = BluebirdPromise.promisifyAll(require('fs')),
     mkdirp = require('mkdirp'),
     compiler = require('./modelCompiler');
 
@@ -96,7 +95,10 @@ function getDefinition(artifactType, artifactName) {
                         if (useCache) {
                             // Models get compiled and cached, so check there first
                             return getArtifactFromCache(artifactType, moduleName, artifactName);
+                        } else {
+                            return getArtifactFromSrc(artifactType, moduleName, artifactName);
                         }
+                        break;
                     default :
                         // All other artifact types don't get compiled, so go directly to src
                         return getArtifactFromSrc(artifactType, moduleName, artifactName);

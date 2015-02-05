@@ -9,6 +9,20 @@ exports.setApp = function (_app) {
     app = _app;
 };
 
+function convertErrorToJson(err) {
+    if (typeof err === 'string') {
+        logger.warn('Try throwing an error instead for message: ' + err);
+        return {
+            code: 'Error',
+            message: err
+        };
+    }
+    return {
+        code: err.name,
+        message: err.message
+    };
+}
+
 /**
  * Lightweight Angular Wrapper that pulls in other resources for Desktop Applications
  */
@@ -94,20 +108,6 @@ exports.mobileBody = function (req, res) {
         });
 };
 
-function convertErrorToJson(err) {
-    if (typeof err === "string") {
-        logger.warn('Try throwing an error instead for message: ' + err);
-        return {
-            code: 'Error',
-            message: err
-        };
-    }
-    return {
-        code: err.name,
-        message: err.message
-    };
-}
-
 /**
  * Returns JSON Object containing page and model definitions
  */
@@ -116,7 +116,7 @@ exports.pageDefinition = function (req, res) {
     return service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
         .then(function (pageDefinition) {
             scope.page = pageDefinition;
-            return service.getDefinition(service.ARTIFACT.MODEL, pageDefinition.modelName)
+            return service.getDefinition(service.ARTIFACT.MODEL, pageDefinition.modelName);
         })
         .then(function (modelDefinition) {
             scope.model = modelDefinition;

@@ -53,7 +53,6 @@ function convertModelToKnexSql(model) {
 
                         second = fromTableAlias + joincolumn.from.dbName;
                     }
-                    console.log(first, operator, second);
                     onClause_this.on(first, operator, second);
                 });
             };

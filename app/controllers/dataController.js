@@ -15,7 +15,7 @@ exports.query = function (req, res) {
     logger.debug('starting data.query()');
     return modelService.getDefinition(modelService.ARTIFACT.MODEL, req.pageName)
         .then(function (modelDefinition) {
-            return reader.getData(modelDefinition, req.query.filterString, req.query.pageNumber)
+            return reader.getData(modelDefinition, req.query.filterString, req.query.pageNumber);
         })
         .then(function (data) {
             res.jsonp(data);
@@ -25,7 +25,9 @@ exports.query = function (req, res) {
         });
 };
 
-exports.save = function (req, res) {
+exports.save = function (req, res, callback) {
+    callback = callback || function () {
+    };
     return modelService.getDefinition(modelService.ARTIFACT.MODEL, req.pageName)
         .then(function (modelDefinition) {
             var dataToSave = req.body;

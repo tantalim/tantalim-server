@@ -70,15 +70,16 @@ function compile(modelDefinition) {
                         };
 
                         step.join.columns = _.map(join.columns, function (onClause) {
+                            var fromColumn;
                             if (onClause.from) {
-                                var fromColumn = _.find(fromTable.columns, function (column) {
+                                fromColumn = _.find(fromTable.columns, function (column) {
                                     if (column.name === onClause.from) {
                                         return column;
                                     }
                                 });
                                 if (!fromColumn) {
-                                    throw Error('Failed to find from join column ' + onClause.from
-                                    + ' in table ' + fromTable.name);
+                                    throw Error('Failed to find from join column ' + onClause.from +
+                                    ' in table ' + fromTable.name);
                                 }
                             } else {
                                 // TODO Implement fromText
@@ -90,8 +91,8 @@ function compile(modelDefinition) {
                                 }
                             });
                             if (!toColumn) {
-                                throw Error('Failed to find to join column ' + onClause.to
-                                + ' in table ' + fromTable.name);
+                                throw Error('Failed to find to join column ' + onClause.to +
+                                ' in table ' + fromTable.name);
                             }
                             return {
                                 from: fromColumn,
@@ -112,7 +113,7 @@ function compile(modelDefinition) {
             }
         });
 
-        if (todo.length == 0) {
+        if (todo.length === 0) {
             logger.info('Building fields');
             _.forEach(modelDefinition.fields, function (field) {
                 if (typeof field.basisColumn === 'string') {
@@ -120,7 +121,7 @@ function compile(modelDefinition) {
                     field.stepCount = 0;
                     if (field.step) {
                         var step = _.find(modelDefinition.steps, function (step) {
-                            if (step.name == field.step) {
+                            if (step.name === field.step) {
                                 return step;
                             }
                         });
