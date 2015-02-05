@@ -1,120 +1,111 @@
 'use strict';
 
-var fileUtils = require('./fileUtils'),
-    pageDS = require('./db/pageDatabaseService'),
-    jsonUtils = require('./jsonUtils'),
-    logger = require('../logger/default').main,
-//    _ = require('lodash'),
-    async = require('async'),
-    BluebirdPromise = require('bluebird');
+var logger = require('../logger/default').debug,
+    _ = require('lodash'),
+    BluebirdPromise = require('bluebird'),
+    fs = BluebirdPromise.promisifyAll(require("fs")),
+    mkdirp = require('mkdirp'),
+    compiler = require('./modelCompiler');
 
-//function endsWith(str, suffix) {
-//    if (!str) {
-//        return false;
-//    }
-//    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-//}
+var ARTIFACT = {
+    TABLE: 'table',
+    MODEL: 'model',
+    PAGE: 'page',
+    MENU: 'menu'
+};
 
-function getLocationByName(pageName) {
-
-    logger.info('starting getLocationByName for %s', pageName);
-
-    function getBestResult(results) {
-        var bestTantalimOption = results.tantalimDir[0] || null;
-        var bestAppOption = results.appDir[0] || null;
-        var bestDatabaseOption = results.databaseOptions[0] || null;
-
-        return bestDatabaseOption || bestAppOption || bestTantalimOption;
-    }
-
-//    function convertDbToResults(data) {
-//        return _.map(data, function (db) {
-//            return _.defaults(db, {
-//                    storageType: 'DATABASE'
-//                }
-//            );
-//        });
-//    }
-
+function getArtifactFromSrc(artifactType, moduleName, artifactName) {
+    // TODO Double check variables for injection
     return new BluebirdPromise(function (resolve, reject) {
-        async.parallel({
-            tantalimDir: function (done) {
-                var rootDir = './tantalim_modules';
-                fileUtils.getListByTypeAndName(rootDir, 'pages', pageName).then(function (data) {
-                    done(null, data);
-                }, function (err) {
-                    done(jsonUtils.error('fileOptions-Reject', err), null);
-                });
-            },
-            appDir: function (done) {
-                var rootDir = './app_modules';
-                fileUtils.getListByTypeAndName(rootDir, 'pages', pageName).then(function (data) {
-                    done(null, data);
-                }, function (err) {
-                    done(jsonUtils.error('fileOptions-Reject', err), null);
-                });
-            },
-            databaseOptions: function (done) {
-                done(null, []);
-                // TODO finish getting pages from the database
-                logger.info('starting databaseOptions');
-                logger.info(pageDS);
-    //                pageDS.getPage(pageName)
-//                    .then(function (data) {
-//                        done(null, convertDbToResults(data));
-//                    }, function (err) {
-//                        done(jsonUtils.error('getPageSql-Reject', err), null);
-//                    })
-//                    .catch(function (err) {
-//                        logger.info('getPageSql-Catch');
-//                        done(jsonUtils.error('getPageSql-Catch', err), null);
-//                    });
-            }
-        }, function (err, results) {
-            if (err) {
-                logger.error('failed');
-                logger.error(err);
-                return reject(err);
-            }
-            logger.info(results);
+        var file = 'tantalim_modules/' + moduleName + '/src/' + artifactType + 's/' + artifactName + '.json';
+        logger.debug('reading file from ' + file);
+        return fs.readFileAsync(file, 'utf8')
+            .then(function (data) {
+                var jsonData = JSON.parse(data);
+                jsonData.name = artifactName;
+                jsonData.moduleName = moduleName;
+                switch (artifactType) {
+                    case ARTIFACT.MODEL:
+                        compiler.compile(jsonData)
+                            .then(resolve)
+                            .catch(reject);
+                        break;
 
-            var bestOption = getBestResult(results);
-            if (!bestOption) {
-                logger.info('no options found');
-                return reject(jsonUtils.error('PAGE_NOT_FOUND', 'Page does not exist for ' + pageName));
-            }
-            resolve(bestOption);
-        });
+                    case ARTIFACT.PAGE:
+                        if (!jsonData.modelName) {
+                            jsonData.modelName = jsonData.name;
+                        }
+                        resolve(jsonData);
+                        break;
+
+                    default:
+                        resolve(jsonData);
+                }
+            })
+            .catch(reject);
     });
 }
 
-function getDefinition(pageLocation) {
+function getArtifactFromCache(artifactType, moduleName, artifactName) {
+    // TODO Double check variables for injection
     return new BluebirdPromise(function (resolve, reject) {
-        logger.info('getPageDefinition');
-        logger.info(pageLocation);
-
-        if (pageLocation.extension === 'json') {
-            fileUtils.getJsonFromFile(pageLocation)
-                .then(function (content) {
-                    resolve(content);
-                });
-        } else {
-            return reject(jsonUtils.error('PAGE_NOT_FOUND', 'Page extension JSON is the only supported type. ' + pageLocation.name));
-        }
+        var dir = 'tantalim_modules/' + moduleName + '/dist/' + artifactType + 's/';
+        var file = dir + artifactName + '.json';
+        logger.debug('reading file from ' + file);
+        return fs.readFileAsync(file, 'utf8')
+            .then(function (data) {
+                resolve(JSON.parse(data));
+            })
+            .catch(function () {
+                logger.debug('catch getArtifactFromCache');
+                return getArtifactFromSrc(artifactType, moduleName, artifactName)
+                    .then(function (data) {
+                        mkdirp(dir, function (err) {
+                            if (err) throw err;
+                            fs.writeFile(file, JSON.stringify(data), function (err) {
+                                if (err) throw err;
+                                console.log('saved file');
+                            });
+                        });
+                        resolve(data);
+                    })
+                    .catch(reject);
+            });
     });
 }
 
-function getSearchByName(pageName, callback) {
-    // TODO convert this to bluebird
-    try {
-        var page = require('../temp/search_' + pageName);
-        callback(page.page, null);
-        return;
-    } catch (e) {
-    }
-    callback(null, new jsonUtils.error('Could not find UI for ' + pageName));
+function getModuleName() {
+    return new BluebirdPromise(function (resolve) {
+        // This is the only one we support right now
+        resolve('tantalim-ide');
+    });
 }
 
-exports.getLocationByName = getLocationByName;
+function getDefinition(artifactType, artifactName) {
+    if (artifactName === undefined) {
+        throw Error('Failed to get undefined ' + artifactType);
+    }
+    var useCache = false; // For dev, turn if off
+    return new BluebirdPromise(function (resolve, reject) {
+        logger.debug('getDefinition for ' + artifactType + ':' + artifactName);
+        getModuleName(artifactType, artifactName)
+            .then(function (moduleName) {
+                logger.debug('getDefinition for ' + moduleName + '/' + artifactName);
+                switch (artifactType) {
+                    case ARTIFACT.MODEL:
+                        if (useCache) {
+                            // Models get compiled and cached, so check there first
+                            return getArtifactFromCache(artifactType, moduleName, artifactName);
+                        }
+                    default :
+                        // All other artifact types don't get compiled, so go directly to src
+                        return getArtifactFromSrc(artifactType, moduleName, artifactName);
+                }
+            })
+            .then(resolve)
+            .catch(reject);
+    });
+}
+
+exports.ARTIFACT = ARTIFACT;
 exports.getDefinition = getDefinition;
-exports.getSearchByName = getSearchByName;

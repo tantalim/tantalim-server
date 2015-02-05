@@ -1,7 +1,6 @@
 'use strict';
 
 var service = require('../services/pageService'),
-    modelService = require('../services/modelService'),
     logger = require('../logger/default').main;
 
 var app;
@@ -40,7 +39,7 @@ exports.mobile = function (req, res) {
 };
 
 exports.searchBody = function (req, res) {
-    service.getLocationByName(req.pageName)
+    return service.getLocationByName(req.pageName)
         .then(function (pageLocation) {
             if (pageLocation.extension === 'html') {
                 return res.sendfile(pageLocation.rawFilePath);
@@ -60,27 +59,23 @@ exports.searchBody = function (req, res) {
 };
 
 exports.htmlBody = function (req, res) {
-    service.getLocationByName(req.pageName)
-        .then(function (pageLocation) {
-            if (pageLocation.extension === 'html') {
-                return res.sendfile(pageLocation.rawFilePath);
-            }
+    return service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
+        .then(function (content) {
+            // TODO Support different types of page layouts: dashboard, traditional, report, html, chart
+            //if (pageLocation.extension === 'html') {
+            //    return res.sendfile(pageLocation.rawFilePath);
+            //}
 
-            service.getDefinition(pageLocation)
-                .then(function (content) {
-                    logger.info(content);
-                    return res.render('page/htmlBody', content);
-                });
-        }, function (err) {
-            return res.render('page/htmlError', err);
+            logger.info(content);
+            return res.render('page/htmlBody', content);
         })
         .catch(function (err) {
-            return res.render('page/htmlError', err);
+            return res.render('page/htmlError', convertErrorToJson(err));
         });
 };
 
 exports.mobileBody = function (req, res) {
-    service.getLocationByName(req.pageName)
+    return service.getLocationByName(req.pageName)
         .then(function (pageLocation) {
             if (pageLocation.extension === 'html') {
                 return res.sendfile(pageLocation.rawFilePath);
@@ -99,35 +94,35 @@ exports.mobileBody = function (req, res) {
         });
 };
 
+function convertErrorToJson(err) {
+    if (typeof err === "string") {
+        logger.warn('Try throwing an error instead for message: ' + err);
+        return {
+            code: 'Error',
+            message: err
+        };
+    }
+    return {
+        code: err.name,
+        message: err.message
+    };
+}
+
 /**
  * Returns JSON Object containing page and model definitions
  */
 exports.pageDefinition = function (req, res) {
-    var errorResponse = function (err) {
-        logger.error('Handling errorResponse in pageController');
-        logger.error(err);
-        return res.render('page/error.js', err);
-    };
-
-    logger.info('pageService.getLocationByName with ' + req.pageName);
-    return service.getLocationByName(req.pageName)
-        .then(function (pageLocation) {
-            if (pageLocation.extension === 'js') {
-                return res.sendfile(pageLocation.rawFilePath);
-            }
-
-            return service.getDefinition(pageLocation)
-                .then(function (pageDefinition) {
-                    return modelService.getLocationByName(pageDefinition.modelName)
-                        .then(function (modelLocation) {
-                            return modelService.getDefinition(modelLocation)
-                                .then(function (modelDefinition) {
-                                    return res.render('page/pageDefinition.js', {
-                                        page: pageDefinition,
-                                        model: modelDefinition
-                                    });
-                                }, errorResponse);
-                        }, errorResponse);
-                }, errorResponse);
-        }, errorResponse);
+    var scope = {};
+    return service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
+        .then(function (pageDefinition) {
+            scope.page = pageDefinition;
+            return service.getDefinition(service.ARTIFACT.MODEL, pageDefinition.modelName)
+        })
+        .then(function (modelDefinition) {
+            scope.model = modelDefinition;
+            return res.render('page/pageDefinition.js', scope);
+        })
+        .catch(function (err) {
+            return res.render('page/error.js', convertErrorToJson(err));
+        });
 };

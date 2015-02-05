@@ -34,11 +34,9 @@ describe('Page Controller', function () {
 
         it('should render error page', function (done) {
             var err = 'something "correctly" went wrong';
-            pageService.getLocationByName = function () {
-                return new BluebirdPromise(function (resolve, reject) {
-                    reject(err);
-                });
-            };
+            pageService.getDefinition = BluebirdPromise.method(function () {
+                throw Error(err);
+            });
 
             controller.pageDefinition(req, res).should.be.fulfilled.then(function () {
                 res.render.calledWith('page/error.js', err).should.be.true;
@@ -52,18 +50,8 @@ describe('Page Controller', function () {
             var modelDefinition = {
                 id: 'TestModel'
             };
-            pageService.getLocationByName = BluebirdPromise.method(function () {
-                return {
-                    extension: 'json'
-                };
-            });
             pageService.getDefinition = BluebirdPromise.method(function () {
                 return pageDefinition;
-            });
-            modelService.getLocationByName = BluebirdPromise.method(function () {
-                return {
-                    extension: 'json'
-                };
             });
             modelService.getDefinition = BluebirdPromise.method(function () {
                 return modelDefinition;

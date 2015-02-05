@@ -4,7 +4,7 @@ var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
     BluebirdPromise = require('bluebird'),
-    fileUtils = {},
+    fs = {},
     chai = require('chai');
 
 chai.Should();
@@ -12,36 +12,32 @@ chai.use(require('chai-as-promised'));
 
 describe('Page service', function () {
     describe('getPageByName', function () {
-        var service;
-
-//        ,
-//        req = {
-//            pageName: 'TestPage'
-//        }
+        var pageService;
 
         beforeEach(function () {
-            service = proxyquire(configAppRoot + 'services/pageService', {
-                './fileUtils': fileUtils
+            pageService = proxyquire(configAppRoot + 'services/pageService', {
+                'fs': fs
             });
-
         });
 
         it('should not find the file', function (done) {
-            fileUtils.getListByTypeAndName = BluebirdPromise.method(function () {
-                return [];
-            });
+            fs.readFileAsync = function () {
+                console.info('readFileAsync');
+            };
 
-            service.getLocationByName('FileDoesNotExist').should.eventually.eql({
+            pageService.getLocationByName('FileDoesNotExist').should.eventually.eql({
                 error: 'PAGE_NOT_FOUND',
                 content: {
                     staticContent: 'Page does not exist for FileDoesNotExist'
                 }
-            }).notify( function(){ done(); });
+            }).notify(function () {
+                done();
+            });
             // function(){ done(); }
             // See https://github.com/visionmedia/mocha/issues/1187
         });
 
-        it('should find the page file', function (done) {
+        it.skip('should find the page file', function (done) {
             fileUtils.getListByTypeAndName = BluebirdPromise.method(function () {
                 return [
                     {
@@ -52,7 +48,7 @@ describe('Page service', function () {
                 ];
             });
 
-            service.getLocationByName('PageFile').should.eventually.eql({
+            pageService.getLocationByName('PageFile').should.eventually.eql({
                 name: 'PageFile',
                 storageType: 'FILE',
                 path: 'foo/bar/PageFile.json'
@@ -68,13 +64,39 @@ describe('Page service', function () {
 //                }
 //            };
 
-            service.getLocationByName('TestDatabasePage').should.eventually.eql({
+            pageService.getLocationByName('TestDatabasePage').should.eventually.eql({
                 content: {
                     page: {},
                     model: {}
                 }
-            }).notify( function(){ done(); });
+            }).notify(function () {
+                done();
+            });
 //            done();
         });
     });
+
+    describe('buildCache', function () {
+        var pageService;
+
+        beforeEach(function () {
+            pageService = proxyquire(configAppRoot + 'services/pageService', {
+                './fileUtils': fileUtils
+            });
+
+        });
+
+        it('should compile the model', function (done) {
+
+            pageService.buildCache('tantalim-ide', 'foo').should.eventually.eql({
+                error: 'PAGE_NOT_FOUND',
+                content: {
+                    staticContent: 'Page does not exist for FileDoesNotExist'
+                }
+            }).notify(function () {
+                done();
+            });
+        });
+
+    })
 });
