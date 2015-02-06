@@ -17,6 +17,7 @@ public/lib
 node_modules
 coverage
 test/coverage
+run_coverage.sh
 
 # Tantalim
 src/tantalim_modules
