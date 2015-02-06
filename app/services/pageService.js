@@ -1,10 +1,11 @@
 'use strict';
 
-var logger = require('../logger/default').debug,
+var logger = require('../logger/default').main,
     BluebirdPromise = require('bluebird'),
     fs = BluebirdPromise.promisifyAll(require('fs')),
     mkdirp = require('mkdirp'),
-    compiler = require('./modelCompiler');
+    modelCompiler = require('./modelCompiler'),
+    menuCompiler = require('./menuCompiler');
 
 var ARTIFACT = {
     TABLE: 'table',
@@ -33,11 +34,15 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                 jsonData.moduleName = moduleName;
                 switch (artifactType) {
                     case ARTIFACT.MODEL:
-                        compiler.compile(jsonData)
+                        modelCompiler.compile(jsonData)
                             .then(resolve)
                             .catch(reject);
                         break;
-
+                    case ARTIFACT.MENU:
+                        menuCompiler.compile(jsonData)
+                            .then(resolve)
+                            .catch(reject);
+                        break;
                     case ARTIFACT.PAGE:
                         if (!jsonData.modelName) {
                             jsonData.modelName = jsonData.name;
