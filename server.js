@@ -160,6 +160,7 @@ var start = function () {
     // Setting the fav icon and static folder
     //app.use(express.favicon());
     app.use(express.static(config.appRoot + '/public'));
+    app.use('/bower_components',  express.static(config.appRoot + '/bower_components'));
 
     // Assume "not found" in the error msgs is a 404. this is somewhat
     // silly, but valid, you can do whatever you like, set properties,

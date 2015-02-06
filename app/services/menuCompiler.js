@@ -48,7 +48,7 @@ function compile(menuDefinition) {
                     pages[pageName] = pageDefinition;
                     return resolveEach();
                 })
-                .catch(function (err) {
+                .catch(function () {
                     pages[pageName] = {title: pageName + ' MISSING'};
                     return resolveEach();
                 });
