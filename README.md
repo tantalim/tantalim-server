@@ -20,3 +20,4 @@ $ npm link tantalim-server
 [![Circle CI](https://circleci.com/gh/tantalim/tantalim-server.svg?style=svg)](https://circleci.com/gh/tantalim/tantalim-server)
 [![Dependency Status](https://david-dm.org/tantalim/tantalim-server.svg)](https://david-dm.org/tantalim/tantalim-server)
 [![Coverage Status](https://coveralls.io/repos/tantalim/tantalim-server/badge.svg)](https://coveralls.io/r/tantalim/tantalim-server)
+[![Code Climate](https://codeclimate.com/github/tantalim/tantalim-server/badges/gpa.svg)](https://codeclimate.com/github/tantalim/tantalim-server)
