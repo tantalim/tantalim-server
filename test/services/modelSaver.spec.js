@@ -20,29 +20,28 @@ describe('Model Saver', function () {
         });
 
         this.modelDefinition = {
-            data: {modelName: 'UnitTestModel'},
+            name: 'UnitTestModel',
             basisTable: {
                 tableName: 'TestUnit',
-                dbName: 'test_unit',
-                primaryKey: {columnName: 'ID', dbName: 'id'}
+                dbName: 'test_unit'
             },
-            primaryKey: {
-                fieldName: 'TestID'
+            instanceID: {
+                name: 'TestID',
+                basisColumn: {
+                    dbName: 'id'
+                }
             },
             fields: [
                 {
-                    fieldName: 'TestID',
-                    basisColumn: {columnName: 'ID', dbName: 'id'},
-                    fieldStep: null,
+                    name: 'TestID',
+                    basisColumn: {dbName: 'id'},
                     updateable: false
                 },
                 {
-                    fieldName: 'TestName',
-                    basisColumn: {columnName: 'Name', dbName: 'name'},
-                    fieldStep: null
+                    name: 'TestName',
+                    basisColumn: {dbName: 'name'}
                 }
-            ],
-            fieldSteps: []
+            ]
         };
     });
 
@@ -163,12 +162,10 @@ describe('Model Saver', function () {
 
     it('should only update columns on this table', function () {
         this.modelDefinition.fields.push({
-            fieldName: 'ParentTestName',
-            basisColumn: {columnName: 'Name', dbName: 'name'},
-            fieldStep: 1
+            name: 'ParentTestName',
+            basisColumn: {name: 'Name', dbName: 'name'},
+            stepCount: 1
         });
-
-        this.modelDefinition.fieldSteps.push({});
 
         var dataToSave = [
             {state: 'UPDATED', id: 1, data: {TestName: 'ChildName', TestID: 1, ParentTestName: 'ParentName'}}

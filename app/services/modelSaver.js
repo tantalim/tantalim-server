@@ -38,7 +38,7 @@ function getColumnHardDefaultOnInsert(field, row) {
 
     switch (getColumnDefault(field)) {
         case 'GUID':
-            row.data[field.fieldName] = row.tempID;
+            row.data[field.name] = row.tempID;
             return row.tempID;
         case 'CreatedDate':
             return knex.raw('NOW()');
@@ -49,7 +49,7 @@ function getColumnHardDefaultOnInsert(field, row) {
 
 function childUpdate(modelDefinition, row) {
     return new BluebirdPromise(function (resolve, reject) {
-        logger.debug('starting childUpdate() for ', modelDefinition.data.modelName);
+        logger.debug('starting childUpdate() for ', modelDefinition.name);
 
         if (!modelDefinition.children) {
             resolve();
@@ -58,7 +58,7 @@ function childUpdate(modelDefinition, row) {
             resolve();
         }
         async.each(modelDefinition.children, function (childModel, resolveEach) {
-            var childData = row.children[childModel.data.modelName];
+            var childData = row.children[childModel.name];
             if (childData) {
                 exports.save(childModel, childData)
                     .then(function () {
@@ -67,7 +67,7 @@ function childUpdate(modelDefinition, row) {
                         reject(err);
                     });
             } else {
-                logger.debug('no data to save for ', childModel.data.modelName);
+                logger.debug('no data to save for ', childModel.name);
                 resolveEach();
             }
         }, function (err) {
@@ -81,14 +81,13 @@ function childUpdate(modelDefinition, row) {
 
 function insertData(modelDefinition, row) {
     return new BluebirdPromise(function (resolve, reject) {
-        logger.debug('starting insertData() for ', modelDefinition.data.modelName);
+        logger.debug('starting insertData() for ', modelDefinition.name);
 
-        var primaryKey = modelDefinition.basisTable.primaryKey;
         var sql = knex(modelDefinition.basisTable.dbName);
 
         var sqlReadyRow = {};
         _.forEach(modelDefinition.fields, function (field) {
-            var sqlReadyValue = row.data[field.fieldName];
+            var sqlReadyValue = row.data[field.name];
 
             var hardDefault = getColumnHardDefaultOnInsert(field, row);
             sqlReadyValue = hardDefault ? hardDefault : sqlReadyValue;
@@ -97,7 +96,8 @@ function insertData(modelDefinition, row) {
             }
         });
 
-        sql.insert(sqlReadyRow, primaryKey.dbName);
+        logger.debug('sqlReadyRow ', sqlReadyRow);
+        sql.insert(sqlReadyRow, modelDefinition.instanceID.basisColumn.dbName);
         sqlLogger.verbose(sql.toSql());
         sqlLogger.debug(sql.getBindings());
 
@@ -105,9 +105,9 @@ function insertData(modelDefinition, row) {
             .then(function (insertId) {
                 delete row.state;
                 if (insertId && insertId.length > 0 && insertId[0] > 0) {
-                    logger.debug('updating %s with autoincrement ', modelDefinition.primaryKey.fieldName, insertId[0]);
+                    logger.debug('updating %s with autoincrement %d', modelDefinition.instanceID.name, insertId[0]);
                     row.id = insertId[0];
-                    row.data[modelDefinition.primaryKey.fieldName] = row.id;
+                    row.data[modelDefinition.instanceID.name] = row.id;
                 } else {
                     row.id = row.tempID;
                 }
@@ -120,67 +120,61 @@ function insertData(modelDefinition, row) {
 
 function updateData(modelDefinition, row) {
     return new BluebirdPromise(function (resolve, reject) {
-        logger.debug('starting updateData() for ', modelDefinition.data.modelName);
+        logger.debug('starting updateData() for ', modelDefinition.name);
 
-        function included(field) {
-            logger.debug(field);
-            function isDefinedAndFalse(value) {
-                if (value === undefined) {
-                    return false;
-                }
-                return !value;
-            }
-
-            if (field.fieldStepID) {
-                // TODO decide between fieldStep and fieldStepID
-                logger.warn('field should use fieldStep, not fieldStepID', field);
-                return false;
-            }
-
-            if (field.fieldStep) {
-                return false;
-            }
-
-            if (isDefinedAndFalse(field.updateable)) {
-                return false;
-            }
-
-            return true;
-        }
-
-        var primaryKey = modelDefinition.basisTable.primaryKey;
         var sql = knex(modelDefinition.basisTable.dbName);
 
-        if (!primaryKey) {
-            logger.error('failed to find basisTable.primaryKey');
-        }
-        var sqlReadyRow = {};
+        var sqlReadyRow = (function getSqlReadyRow() {
+            function included(field) {
+                function isDefinedAndFalse(value) {
+                    if (value === undefined) {
+                        return false;
+                    }
+                    return !value;
+                }
 
-        _.forEach(modelDefinition.fields, function (field) {
-            if (included(field)) {
-                var sqlReadyValue,
-                    hardDefault = getColumnHardDefaultOnUpdate(field);
-                if (hardDefault) {
-                    sqlReadyValue = hardDefault;
-                } else {
+                if (field.stepCount > 0) {
+                    return false;
+                }
+
+                if (isDefinedAndFalse(field.updateable)) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            var sqlReadyRow = {};
+            _.forEach(modelDefinition.fields, function (field) {
+                if (included(field)) {
+                    logger.debug('Preparing to save field: ', field);
+                    var sqlReadyValue,
+                        hardDefault = getColumnHardDefaultOnUpdate(field);
+                    if (hardDefault) {
+                        sqlReadyValue = hardDefault;
+                    } else {
 //                    if (field.dataType) {
 //                    }
-                    sqlReadyValue = row.data[field.fieldName];
-                }
+                        sqlReadyValue = row.data[field.name];
+                    }
 
-                if (sqlReadyValue !== undefined) {
-                    sqlReadyRow[field.basisColumn.dbName] = sqlReadyValue;
+                    if (sqlReadyValue !== undefined) {
+                        sqlReadyRow[field.basisColumn.dbName] = sqlReadyValue;
+                    }
                 }
-            }
-        });
-        logger.debug('built sqlReadyRow ', sqlReadyRow);
+            });
+            logger.debug('built sqlReadyRow ', JSON.stringify(sqlReadyRow));
+            return sqlReadyRow;
+        })();
 
         sql
             .update(sqlReadyRow)
-            .where(primaryKey.dbName, row.id);
-        sqlLogger.verbose(sql.toSql());
+            .where(modelDefinition.instanceID.basisColumn.dbName, row.id);
+        logger.debug('show update where ' + modelDefinition.instanceID.basisColumn.dbName + ' = ' + row.id);
+        sqlLogger.debug(sql.toSql());
         sqlLogger.debug(sql.getBindings());
 
+        logger.debug('Running update');
         sql
             .then(function () {
                 delete row.state;
@@ -198,14 +192,13 @@ function updateData(modelDefinition, row) {
 
 function deleteData(modelDefinition, row) {
     return new BluebirdPromise(function (resolve, reject) {
-        logger.debug('starting deleteData() for ', modelDefinition.data.modelName);
+        logger.debug('starting deleteData() for ', modelDefinition.name);
 
-        var primaryKey = modelDefinition.basisTable.primaryKey;
         var sql = knex(modelDefinition.basisTable.dbName);
 
         sql
             .del()
-            .where(primaryKey.dbName, row.id);
+            .where(modelDefinition.instanceID.basisColumn.dbName, row.id);
         sqlLogger.verbose(sql.toSql());
         sqlLogger.debug(sql.getBindings());
 
@@ -240,8 +233,13 @@ function saveSingleRow(modelDefinition, row) {
 
 exports.save = function (modelDefinition, data) {
     return new BluebirdPromise(function (resolve, reject) {
-        logger.debug('starting modelSaver.save() on %s', modelDefinition.data.modelName);
+        logger.debug('starting modelSaver.save() on %s', modelDefinition.name);
 //        logger.debug(data);
+
+        if (!modelDefinition.instanceID) {
+            throw Error('Cannot insert/update/delete an instance without an instanceID for ' + modelDefinition.name);
+        }
+        logger.debug(modelDefinition.instanceID);
 
         async.each(data, function (row, resolveEach) {
             saveSingleRow(modelDefinition, row)
@@ -250,7 +248,7 @@ exports.save = function (modelDefinition, data) {
                 })
                 .catch(function (err) {
                     logger.error('failed on saveSingleRow catch');
-                    logger.error(modelDefinition);
+                    //logger.error(modelDefinition);
                     logger.error(row);
                     resolveEach(err);
                 });
