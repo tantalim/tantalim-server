@@ -28,7 +28,10 @@ var setup = function (custom) {
         environment: process.env.NODE_ENV || 'development',
         sessionSecret: 'OVERRIDE_THIS_HASH_IN_YOUR_CONFIG',
         sessionCollection: 'sessions',
-        passportStrategy: null
+        passportStrategy: null,
+        locals: {
+            title: 'Tantalim Application'
+        }
     };
     config = _.extend(defaultConfig, custom || {});
 
@@ -183,7 +186,7 @@ var start = function () {
     });
 
     var server = app.listen(config.port, function () {
-        console.log('Tantalim Server running %s on port:%d', config.environment, server.address().port);
+        console.log('%s powered by Tantalim is now running %s on port:%d', config.locals.title, config.environment, server.address().port);
     });
 
     return app;
