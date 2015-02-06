@@ -1,6 +1,7 @@
 'use strict';
 
 var service = require('../services/pageService'),
+    menuService = require('../services/menuService'),
     logger = require('../logger/default').main;
 
 var app;
@@ -32,12 +33,30 @@ exports.desktop = function (req, res) {
         return;
     }
 
-    res.render('desktop', {
-        appTitle: app.locals.title,
-        pageName: req.pageName,
-        title: req.pageName,
-        user: req.user
-    });
+    function renderDesktop(menu) {
+        return res.render('desktop', {
+            appTitle: app.locals.title,
+            css: app.locals.css,
+            pageName: req.pageName,
+            title: req.pageName,
+            menu: menu,
+            user: req.user
+        });
+    }
+
+    return menuService.buildMenuItems(req.user)
+        .then(function (menu) {
+            return renderDesktop(menu);
+        })
+        .catch(function (err) {
+            var fakeMenu = {
+                content: [{
+                    title: 'Failed to build menu',
+                    items: [{title: err}]
+                }]
+            };
+            return renderDesktop(fakeMenu);
+        });
 };
 
 /**

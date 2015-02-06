@@ -1,6 +1,6 @@
 'use strict';
 
-var logger = require('../logger/default').main,
+var logger = require('../logger/default').debug,
     BluebirdPromise = require('bluebird'),
     fs = BluebirdPromise.promisifyAll(require('fs')),
     mkdirp = require('mkdirp'),
@@ -13,11 +13,19 @@ var ARTIFACT = {
     MENU: 'menu'
 };
 
+function getArtifactDirectory(moduleName) {
+    if (moduleName && moduleName !== 'local') {
+        return 'tantalim_modules/' + moduleName + '/';
+    }
+    return '';
+}
+
 function getArtifactFromSrc(artifactType, moduleName, artifactName) {
     // TODO Double check variables for injection
     return new BluebirdPromise(function (resolve, reject) {
-        var file = 'tantalim_modules/' + moduleName + '/src/' + artifactType + 's/' + artifactName + '.json';
-        //logger.debug('reading file from ' + file);
+        var file = getArtifactDirectory() + 'src/' + artifactType + 's/' + artifactName + '.json';
+
+        logger.debug('reading file from ' + file);
         return fs.readFileAsync(file, 'utf8')
             .then(function (data) {
                 var jsonData = JSON.parse(data);
@@ -48,9 +56,8 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
 function getArtifactFromCache(artifactType, moduleName, artifactName) {
     // TODO Double check variables for injection
     return new BluebirdPromise(function (resolve, reject) {
-        var dir = 'tantalim_modules/' + moduleName + '/dist/' + artifactType + 's/';
-        var file = dir + artifactName + '.json';
-        //logger.debug('reading file from ' + file);
+        var file = getArtifactDirectory() + 'dist/' + artifactType + 's/' + artifactName + '.json';
+        logger.debug('reading file from ' + file);
         return fs.readFileAsync(file, 'utf8')
             .then(function (data) {
                 resolve(JSON.parse(data));

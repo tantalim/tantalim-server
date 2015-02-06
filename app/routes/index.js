@@ -1,7 +1,6 @@
 'use strict';
 
 var pageController = require('../controllers/pageController'),
-    menuController = require('../controllers/menuController'),
     passport = require('passport');
 
 function addUserPages(app) {
@@ -84,10 +83,6 @@ module.exports = function (app) {
     app.param('pageName', function (req, res, next, pageName) {
         req.pageName = pageName;
         next();
-    });
-
-    app.get('/menu', function (req, res) {
-        menuController.menu(req, res);
     });
 
     addLogins(app);

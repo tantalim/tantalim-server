@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="/lib/tantalim-client/public/select/select.css">
     <link rel="stylesheet" href="/lib/angular-grid/ng-grid.min.css">
     <link rel="stylesheet" href="/lib/tantalim-client/public/css/common.css">
-    <link rel="stylesheet" href="/assets/desktop.css">
+
+    <link rel="stylesheet" href="{{ css }}">
 
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -25,10 +26,6 @@
 <div class="visible-xs alert alert-info">
     Try the <a href="/m/">Mobile Version</a>
 </div>
-<script type="text/javascript">
-    window.pageName = '{{pageName}}';
-    window.user = {{{json user}}};
-</script>
 
 <!-- Bootstrap JS -->
 <script type="text/javascript" src="/lib/jquery/dist/jquery.js"></script>
@@ -55,5 +52,9 @@
 <!-- Tantalim JS -->
 <script type="text/javascript" src="/lib/tantalim-client/public/js/tantalim.desktop.js"></script>
 <script type="text/javascript" src="/page-definition/{{pageName}}"></script>
+<script type="text/javascript">
+    window.pageName = '{{pageName}}';
+    window.user = {{{json user}}};
+</script>
 </body>
 </html>
