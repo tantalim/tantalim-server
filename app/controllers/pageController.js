@@ -75,8 +75,8 @@ exports.mobile = function (req, res) {
                 page: 'ListTables'
             },
             {
-                title: 'Build Tables',
-                page: 'BuildTables'
+                title: 'Build Table',
+                page: 'BuildTable'
             }
         ]
     };
