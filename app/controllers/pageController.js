@@ -63,11 +63,32 @@ exports.desktop = function (req, res) {
  * Lightweight Angular Wrapper that pulls in other resources for Mobile Applications
  */
 exports.mobile = function (req, res) {
+    if (!req.user) {
+        res.redirect('/login');
+        return;
+    }
+
+    var menu = {
+        content: [
+            {
+                title: 'List Tables',
+                page: 'ListTables'
+            },
+            {
+                title: 'Build Tables',
+                page: 'BuildTables'
+            }
+        ]
+    };
+
     // Get the real page title
     res.render('mobile', {
-        appName: 'Tantalim',
+        appTitle: app.locals.title,
+        css: app.locals.css,
         pageName: req.pageName,
-        title: req.pageName
+        title: req.pageName,
+        menu: menu,
+        user: req.user
     });
 };
 
@@ -99,19 +120,10 @@ exports.htmlBody = function (req, res) {
 };
 
 exports.mobileBody = function (req, res) {
-    return service.getLocationByName(req.pageName)
-        .then(function (pageLocation) {
-            if (pageLocation.extension === 'html') {
-                return res.sendfile(pageLocation.rawFilePath);
-            }
-
-            service.getDefinition(pageLocation)
-                .then(function (content) {
-                    logger.info(content);
-                    return res.render('page/mobileBody', content);
-                });
-        }, function (err) {
-            return res.render('page/mobileError', err);
+    return service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
+        .then(function (content) {
+            logger.info(content);
+            return res.render('page/mobileBody', content);
         })
         .catch(function (err) {
             return res.render('page/mobileError', err);
