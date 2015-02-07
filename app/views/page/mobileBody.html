@@ -17,6 +17,11 @@
             <i class="fa fa-plus"></i> New
         </div>
     </div>
+    <div class="btn-group pull-right">
+        <a class="btn btn-navbar" href="/page/{{name}}/#/">
+            <i class="fa fa-desktop"></i> Desktop Version
+        </a>
+    </div>
 
     <!--<div class="alert alert-warning" data-ng-show="serverStatus" data-ng-bind="serverStatus"></div>-->
     <!--<div class="alert alert-danger" data-ng-show="serverError" data-ng-bind="serverError"></div>-->
@@ -46,23 +51,22 @@
      ng-swipe-right="current.sets.{{modelName}}.movePrevious()"
      ng-swipe-left="current.sets.{{modelName}}.moveNext()">
     <div class="scrollable">
-        <div class="scrollable-content">
-            <form>
-                <div class="panel" title="{{title}}">
-                    <div class="panel-body">
-                        {{#formFields}}
-                        <div class="form-group">
+        <div class="scrollable-content section">
+            <form role="form">
+                <fieldset>
+                    <legend>{{title}}</legend>
+                </fieldset>
+                {{#formFields}}
+                <div class="form-group">
 
-                            <label for="{{../id}}-{{fieldName}}">{{fieldLabel}}</label>
-                            <input type="text" class="form-control" id="{{../id}}-{{fieldName}}"
-                                   data-ng-model="current.instances.{{../modelName}}.data.{{fieldName}}"
-                                   ng-change="rowChanged(current.instances.{{../modelName}})"
-                                   {{#if disabled}}disabled{{/if}}
-                            >
-                        </div>
-                        {{/formFields}}
-                    </div>
+                    <label for="{{../id}}-{{fieldName}}">{{fieldLabel}}</label>
+                    <input type="text" class="form-control" id="{{../id}}-{{fieldName}}"
+                           data-ng-model="current.instances.{{../modelName}}.data.{{fieldName}}"
+                           ng-change="rowChanged(current.instances.{{../modelName}})"
+                           {{#if disabled}}disabled{{/if}}
+                    >
                 </div>
+                {{/formFields}}
             </form>
         </div>
     </div>
