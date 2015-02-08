@@ -33,20 +33,36 @@ exports.desktop = function (req, res) {
         return;
     }
 
-    function renderDesktop(menu) {
-        return res.render('desktop', {
-            appTitle: app.locals.title,
-            css: app.locals.css,
-            pageName: req.pageName,
-            title: req.pageName,
-            menu: menu,
-            user: req.user
-        });
+    function renderDesktop(menu, page) {
+        console.info(page);
+        page.template = page.template || 'desktop';
+        page.appTitle = page.appTitle || app.locals.title;
+        page.css = page.css || app.locals.css;
+        page.pageName = page.pageName || req.pageName;
+        page.title = page.title || req.pageName;
+        page.menu = page.menu || menu;
+        page.user = req.user;
+
+        page.page = {
+            modelName: page.modelName
+        };
+        page.model = {};
+        console.info(page);
+
+        return res.render(page.template, page);
     }
 
     return menuService.buildMenuItems(req.user)
         .then(function (menu) {
-            return renderDesktop(menu);
+            service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
+                .then(function (content) {
+                    logger.info(content);
+                    return renderDesktop(menu, content);
+                    //return res.render('page/htmlBody', content);
+                })
+                .catch(function (err) {
+                    return res.render('page/htmlError', convertErrorToJson(err));
+                });
         })
         .catch(function (err) {
             var fakeMenu = {
@@ -100,22 +116,6 @@ exports.searchBody = function (req, res) {
         })
         .catch(function (err) {
             return res.render('page/htmlError', err);
-        });
-};
-
-exports.htmlBody = function (req, res) {
-    return service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
-        .then(function (content) {
-            // TODO Support different types of page layouts: dashboard, traditional, report, html, chart
-            //if (pageLocation.extension === 'html') {
-            //    return res.sendfile(pageLocation.rawFilePath);
-            //}
-
-            logger.info(content);
-            return res.render('page/htmlBody', content);
-        })
-        .catch(function (err) {
-            return res.render('page/htmlError', convertErrorToJson(err));
         });
 };
 

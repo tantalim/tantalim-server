@@ -21,7 +21,21 @@
 <body>
 {{> menu}}
 <section class="content container">
-    {{{ content }}}
+    {{#columns}}
+    <div class="dashboardColumn {{cssClasses}}">
+        {{#widgets}}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    {{#if glyphicon}}<span class="glyphicon glyphicon-{{glyphicon}}" aria-hidden="true"></span>{{/if}}
+                    {{{title}}}
+                </h3>
+            </div>
+            <div class="panel-body text-center">{{{content}}}</div>
+        </div>
+        {{/widgets}}
+    </div>
+    {{/columns}}
 </section>
 
 <!-- Bootstrap JS -->
