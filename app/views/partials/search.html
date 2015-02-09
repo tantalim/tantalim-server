@@ -1,0 +1,43 @@
+<div id="search-view" data-ng-show="searchMode">
+    <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
+        <button data-ng-click="searchMode = false" class="btn btn-default">
+            <span class="glyphicon glyphicon-th"></span>
+            Form View
+        </button>
+        <button data-ng-click="refresh()" class="btn btn-default">
+            <span class="glyphicon glyphicon-repeat"></span>
+            Clear Search
+        </button>
+        <button class="btn btn-success" data-ng-click="submit()" data-ng-disabled="!values">
+            <span class="glyphicon glyphicon-search"></span>
+            Search
+        </button>
+    </div>
+
+    <form class="form-horizontal" ng-submit="submit()">
+        <div class="form-group col-xs-12">
+            <label>Advanced Query Language</label>
+            <textarea class="form-control" rows="4" data-ng-model="filterString"></textarea>
+        </div>
+
+        <!-- We might want to consider changing this from #formFields to a new #searchFields option -->
+        {{#formFields}}
+        <div class="form-group col-xs-12">
+            <label for="search-{{fieldName}}" class="col-xs-2 control-label">{{fieldLabel}}</label>
+
+            <div class="col-xs-4">
+                <select class="form-control" id="search-{{fieldName}}-compare"
+                        ng-model="comparators.{{fieldName}}">
+                    <option>Contains</option>
+                    <option>Equals</option>
+                    <option>BeginsWith</option>
+                    <option>EndsWith</option>
+                </select>
+            </div>
+            <div class="col-xs-6">
+                <input type="text" class="form-control" id="search-{{fieldName}}" ng-model="values.{{fieldName}}">
+            </div>
+        </div>
+        {{/formFields}}
+    </form>
+</div>

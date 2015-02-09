@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Error</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/bower_components/fontawesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bower_components/tantalim-client/public/select/select.css">
+    <link rel="stylesheet" href="/bower_components/angular-grid/ng-grid.min.css">
+    <link rel="stylesheet" href="/bower_components/tantalim-client/public/css/common.css">
+    {{#if page.css}}
+    <link rel="stylesheet" href="{{ page.css }}">
+    {{/if}}
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+{{> menu}}
+<div class="content container">
+
+    <div class="jumbotron col-sm-10 col-sm-offset-1">
+        <h3>Tantalim Error</h3>
+
+        <div class="alert alert-danger">
+            <p>
+                <strong>{{error.code}}</strong>
+                <span>{{error.message}}</span>
+            </p>
+
+            {{#if error.stacktrace}}
+            <h4>Stacktrace</h4>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Method</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#error.stacktrace}}
+                <tr>
+                    <td>{{filename}}</td>
+                    <td>{{method}}</td>
+                </tr>
+                {{/error.stacktrace}}
+                </tbody>
+            </table>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script type="text/javascript" src="/bower_components/jquery/dist/jquery.js"></script>
+<script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+
+</body>
+</html>

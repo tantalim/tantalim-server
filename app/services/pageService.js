@@ -4,6 +4,7 @@ var logger = require('../logger/default').main,
     BluebirdPromise = require('bluebird'),
     fs = BluebirdPromise.promisifyAll(require('fs')),
     mkdirp = require('mkdirp'),
+    errors = require('../errors'),
     modelCompiler = require('./modelCompiler'),
     menuCompiler = require('./menuCompiler');
 
@@ -32,16 +33,31 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                 var jsonData = JSON.parse(data);
                 jsonData.name = artifactName;
                 jsonData.moduleName = moduleName;
+                logger.debug('resolving %s data for %s', artifactType, artifactName);
                 switch (artifactType) {
                     case ARTIFACT.MODEL:
                         modelCompiler.compile(jsonData)
                             .then(resolve)
-                            .catch(reject);
+                            .catch(function(err) {
+                                console.log('error', err);
+                                errors.addTrace(err, {
+                                    method: 'getArtifactFromSrc',
+                                    filename: __filename
+                                });
+                                reject(err);
+                            });
                         break;
                     case ARTIFACT.MENU:
                         menuCompiler.compile(jsonData)
                             .then(resolve)
-                            .catch(reject);
+                            .catch(function(err) {
+                                console.log('error', err);
+                                errors.addTrace(err, {
+                                    method: 'getArtifactFromSrc',
+                                    filename: __filename
+                                });
+                                reject(err);
+                            });
                         break;
                     case ARTIFACT.PAGE:
                         if (!jsonData.modelName) {
@@ -54,7 +70,14 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                         resolve(jsonData);
                 }
             })
-            .catch(reject);
+            .catch(function(err) {
+                console.log('error', err);
+                errors.addTrace(err, {
+                    method: 'getArtifactFromSrc',
+                    filename: __filename
+                });
+                reject(err);
+            });
     });
 }
 
@@ -80,7 +103,14 @@ function getArtifactFromCache(artifactType, moduleName, artifactName) {
                         });
                         resolve(data);
                     })
-                    .catch(reject);
+                    .catch(function(err) {
+                        console.log('error', err);
+                        errors.addTrace(err, {
+                            method: 'getArtifactFromCache',
+                            filename: __filename
+                        });
+                        reject(err);
+                    });
             });
     });
 }
@@ -93,6 +123,7 @@ function getModuleName() {
 }
 
 function getDefinition(artifactType, artifactName) {
+    console.log('getDefinition %s %s', artifactType, artifactName);
     if (artifactName === undefined) {
         throw Error('Failed to get undefined ' + artifactType);
     }
@@ -117,7 +148,14 @@ function getDefinition(artifactType, artifactName) {
                 }
             })
             .then(resolve)
-            .catch(reject);
+            .catch(function(err) {
+                console.log('error', err);
+                errors.addTrace(err, {
+                    method: 'getDefinition',
+                    filename: __filename
+                });
+                reject(err);
+            });
     });
 }
 

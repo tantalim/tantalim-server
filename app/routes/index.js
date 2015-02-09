@@ -5,21 +5,21 @@ var pageController = require('../controllers/pageController'),
 
 function addUserPages(app) {
     app.get('/m/:pageName', function (req, res) {
-        pageController.mobile(req, res);
-    });
-
-    app.get('/page/:pageName/', function (req, res) {
-        pageController.desktop(req, res);
+        pageController.mobile(req, res, app.locals);
     });
 
     app.get('/m/', function (req, res) {
-        req.pageName = 'Home';
-        pageController.mobile(req, res);
+        req.pageName = 'Home'; // TODO get this 'Home' from the menu default
+        pageController.mobile(req, res, app.locals);
+    });
+
+    app.get('/page/:pageName/', function (req, res) {
+        pageController.desktop(req, res, app.locals);
     });
 
     app.get('/', function (req, res) {
-        req.pageName = 'Home';
-        pageController.desktop(req, res);
+        req.pageName = 'Home'; // TODO get this 'Home' from the menu default
+        pageController.desktop(req, res, app.locals);
     });
 }
 
@@ -35,18 +35,6 @@ function addDataApi(app) {
 }
 
 function addFrontEndJavaScriptAndHtmlPartials(app) {
-    app.get('/page-definition/:pageName', function (req, res) {
-        pageController.pageDefinition(req, res);
-    });
-
-    app.get('/page/:pageName/html', function (req, res) {
-        pageController.htmlBody(req, res);
-    });
-
-    app.get('/page/:pageName/search', function (req, res) {
-        pageController.searchBody(req, res);
-    });
-
     app.get('/m/:pageName/detail', function (req, res) {
         pageController.mobileBody(req, res);
     });
@@ -63,7 +51,7 @@ function addLogins(app) {
     });
 
     app.get('/login', function (req, res) {
-        res.render('security/login', {
+        res.render('login', {
             appTitle: app.locals.title,
             message: req.flash('error')
         });
@@ -79,7 +67,6 @@ function addLogins(app) {
 }
 
 module.exports = function (app) {
-    pageController.setApp(app);
     app.param('pageName', function (req, res, next, pageName) {
         req.pageName = pageName;
         next();

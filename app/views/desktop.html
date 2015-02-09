@@ -4,41 +4,48 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>{{title}}</title>
+    <title>{{page.title}}</title>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/img/icons/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    {{#if page.favicon}}
+    <link href="{{page.favicon}}" rel="shortcut icon" type="image/x-icon">
+    {{/if}}
 
+    <link rel="stylesheet" href="/bower_components/fontawesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/bower_components/tantalim-client/public/select/select.css">
     <link rel="stylesheet" href="/bower_components/angular-grid/ng-grid.min.css">
     <link rel="stylesheet" href="/bower_components/tantalim-client/public/css/common.css">
-{{#if css}}
-    <link rel="stylesheet" href="{{ css }}">
+{{#if page.css}}
+    <link rel="stylesheet" href="{{ page.css }}">
 {{/if}}
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 </head>
-<body>
+<body data-ng-controller="PageController">
 {{> menu}}
-<section class="content container" data-ng-controller="PageController">
-    <div id="server-status" class="alert alert-warning" data-ng-show="serverStatus" data-ng-bind="serverStatus"></div>
-    <div id="server-error" class="alert alert-danger" data-ng-show="serverError" data-ng-bind-html="serverError"
-         data-spy="affix-bottom"></div>
-    <div id="static-content" data-ng-show="staticContent" data-ng-bind="staticContent"></div>
-    <!--<div id="toc" class="col-sm-2 hidden-xs">-->
-    <!--{{> toc_item}}-->
-    <!--</div>-->
-    <!--<div id="page-deck" class="col-sm-10 col-sm-offset-2">-->
-    <div id="page-deck" class="col-sm-12">
-        {{> page }}
+<div id="loading" class="container text-center col-xs-8 col-xs-offset-2" data-ng-show="showLoadingScreen">
+    <h1>
+        <i class="fa fa-spinner fa-spin" data-ng-hide="serverError"></i>
+        Loading {{page.title}}
+    </h1>
+    <div class="alert alert-danger ng-hide" data-ng-show="serverError" data-ng-bind-html="serverError"></div>
+</div>
+<section class="content container ng-hide" data-ng-hide="showLoadingScreen">
+    <div id="page-body">
+        <div id="server-status" class="alert alert-warning" data-ng-show="serverStatus" data-ng-bind="serverStatus"></div>
+        <div id="server-error" class="alert alert-danger" data-ng-show="serverError" data-ng-bind-html="serverError"
+             data-spy="affix-bottom"></div>
+            <h3>{{page.title}}</h3>
+        {{> page page}}
+        {{> search page}}
+        <a href="/m/{{page.name}}/#/" class="btn btn-primary visible-xs col-xs-10 col-xs-offset-1">
+            <span class="glyphicon glyphicon-phone"></span>
+            Mobile Version
+        </a>
     </div>
 </section>
-<a href="/m/{{pageName}}/#/" class="btn btn-primary visible-xs col-xs-10 col-xs-offset-1">
-    <span class="glyphicon glyphicon-phone"></span>
-    Mobile Version
-</a>
 
 <!-- Bootstrap JS -->
 <script type="text/javascript" src="/bower_components/jquery/dist/jquery.js"></script>
@@ -54,9 +61,6 @@
 <script type="text/javascript" src="/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
 <script type="text/javascript" src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 
-<!-- Angular Grid -->
-<!--<script type="text/javascript" src="/bower_components/angular-grid/ng-grid-2.0.7.js"></script>-->
-
 <script type="text/javascript" src="/bower_components/angular-ui-utils/ui-utils.js"></script>
 <script type="text/javascript" src="/bower_components/tantalim-client/public/select/select.js"></script>
 
@@ -65,13 +69,9 @@
 <!-- Tantalim JS -->
 <script type="text/javascript" src="/bower_components/tantalim-client/public/js/tantalim.desktop.js"></script>
 <script type="text/javascript">
-    window.pageName = '{{pageName}}';
-    window.user = {{{json user}}};
-    'use strict';
-    angular.module('tantalim.common').factory('ModelData', function () {
+    angular.module('tantalim.common').factory('PageDefinition', function () {
         return {
-            currentModel: '{{page.modelName}}',
-            model: {{{json model}}},
+            user: {{{json user}}},
             page: {{{json page}}}
         };
     });

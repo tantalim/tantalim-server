@@ -1,8 +1,9 @@
-<div id="{{id}}">
+<div id="form-view" data-ng-hide="searchMode">
     <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
-        <a href="#/search" class="btn btn-default">
+        <button data-ng-click="searchMode = true" class="btn btn-default">
             <span class="glyphicon glyphicon-search"></span>
-            Search View</a>
+            Search View
+        </button>
         <button data-ng-click="refresh()" class="btn btn-default">
             <span class="glyphicon glyphicon-refresh"></span>
             Refresh
