@@ -34,13 +34,6 @@ describe('Data Controller', function () {
             var modelSaver = {
                 save: function (modelDefinition, data) {
                     console.info('save');
-//                    function () {
-//                        switch (modelDefinition.modelName) {
-//                            case 'InvalidData':
-//                                throw new Error('Invalid data');
-//                        }
-//                        return data;
-//                    }
                     return BluebirdPromise.resolve(data);
                 }
             };

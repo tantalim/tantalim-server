@@ -44,7 +44,7 @@ describe('Page Controller', function () {
 
     it('should render json page', function (done) {
         var pageDefinition = {
-            modelName: 'TestModel'
+            model: 'TestModel'
         };
         var modelDefinition = {
             id: 'TestModel'

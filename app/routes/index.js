@@ -13,7 +13,11 @@ function addUserPages(app) {
         pageController.mobile(req, res, app.locals);
     });
 
-    app.get('/page/:pageName/', function (req, res) {
+    app.get('/page/:pageName/:mode', function (req, res) {
+        pageController.desktop(req, res, app.locals);
+    });
+
+    app.get('/page/:pageName', function (req, res) {
         pageController.desktop(req, res, app.locals);
     });
 

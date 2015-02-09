@@ -1,21 +1,21 @@
 {{#formFields}}
 <div class="form-group">
     {{#fieldType fieldType 'text'}}
-        <label for="{{../../modelName}}-{{fieldName}}">{{fieldLabel}}</label>
-        <input type="text" class="form-control" id="{{../../modelName}}-{{fieldName}}"
-               data-ng-model="current.instances.{{../../modelName}}.data.{{fieldName}}"
-               ng-change="rowChanged(current.instances.{{../../modelName}})"
+        <label for="{{../../model.name}}-{{fieldName}}">{{fieldLabel}}</label>
+        <input type="text" class="form-control" id="{{../../model.name}}-{{fieldName}}"
+               data-ng-model="current.instances.{{../../model.name}}.data.{{fieldName}}"
+               ng-change="rowChanged(current.instances.{{../../model.name}})"
         {{#if disabled}}disabled{{/if}}
         >
     {{/fieldType}}
     {{#fieldType fieldType 'select'}}
-        <label for="{{../../modelName}}-{{fieldName}}">{{fieldLabel}}</label>
+        <label for="{{../../model.name}}-{{fieldName}}">{{fieldLabel}}</label>
         <ui-select
-                current="current.instances.{{../../modelName}}.data"
+                current="current.instances.{{../../model.name}}.data"
                 item-model="{{select.model}}"
                 item-value="{{select.sourceValue}}"
                 item-where="{{json select.where}}"
-                instance-model="{{../../modelName}}"
+                instance-model="{{../../model.name}}"
                 instance-key="{{select.targetID}}"
                 instance-value="{{fieldName}}"
                 other-mappings="{{json this.select.otherMappings}}"
@@ -23,10 +23,10 @@
     {{/fieldType}}
     {{#fieldType fieldType 'checkbox'}}
         <div class="checkbox">
-            <label class="ui-checkbox" for="{{../../modelName}}-{{fieldName}}">
-                <input type="checkbox" id="{{../../modelName}}-{{fieldName}}"
-                       data-ng-model="current.instances.{{../../modelName}}.data.{{fieldName}}"
-                       ng-change="rowChanged(current.instances.{{../../modelName}})">
+            <label class="ui-checkbox" for="{{../../model.name}}-{{fieldName}}">
+                <input type="checkbox" id="{{../../model.name}}-{{fieldName}}"
+                       data-ng-model="current.instances.{{../../model.name}}.data.{{fieldName}}"
+                       ng-change="rowChanged(current.instances.{{../../model.name}})">
                 {{fieldLabel}}
             </label>
         </div>

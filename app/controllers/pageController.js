@@ -3,6 +3,7 @@
 var service = require('../services/pageService'),
     menuService = require('../services/menuService'),
     errors = require('../errors'),
+    _ = require('lodash'),
     logger = require('../logger/default').main;
 
 function convertErrorToJson(err) {
@@ -41,6 +42,22 @@ exports.desktop = function (req, res, appLocals) {
         });
     }
 
+    function attachModelToPage(page, model) {
+        page.model = model;
+        if (page.children) {
+            _.forEach(page.children, function(childPage) {
+                if (childPage.model && model.children) {
+                    var childModel = _.find(model.children, function(childModel) {
+                        if (childModel.name === childPage.model) {
+                            return childModel;
+                        }
+                    });
+                    attachModelToPage(childPage, childModel);
+                }
+            });
+        }
+    }
+
     return menuService.buildMenuItems(req.user)
         .then(function (menu) {
             service.getDefinition(service.ARTIFACT.PAGE, req.pageName)
@@ -48,7 +65,7 @@ exports.desktop = function (req, res, appLocals) {
                     if (page.model) {
                         service.getDefinition(service.ARTIFACT.MODEL, page.model)
                             .then(function (model) {
-                                page.model = model;
+                                attachModelToPage(page, model);
                                 return renderDesktop(page, menu);
                             })
                             .catch(function (err) {

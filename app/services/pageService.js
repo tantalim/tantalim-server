@@ -60,9 +60,6 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                             });
                         break;
                     case ARTIFACT.PAGE:
-                        if (!jsonData.modelName) {
-                            jsonData.modelName = jsonData.name;
-                        }
                         resolve(jsonData);
                         break;
 

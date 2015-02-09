@@ -1,53 +1,52 @@
 <div>
-    <div class="well text-center" data-ng-hide="action.length('{{modelName}}')">
-        <button type="button" class="btn btn-primary " data-ng-click="action.insert('{{modelName}}')">
+    <legend>{{title}}</legend>
+    <div class="well text-center" data-ng-hide="action.length('{{model.name}}')">
+        <button type="button" class="btn btn-primary " data-ng-click="action.insert('{{model.name}}')">
             <span class="glyphicon glyphicon-plus"></span>
-            Insert {{title}}
+            Insert New {{title}}
         </button>
     </div>
-    <div data-ng-show="action.length('{{modelName}}')">
+    <div data-ng-show="action.length('{{model.name}}')">
         <div class="form-group">
-            <button type="button" class="btn btn-primary btn-xs" data-ng-click="action.insert('{{modelName}}')">
+            <button type="button" class="btn btn-primary btn-xs" data-ng-click="action.insert('{{model.name}}')">
                 <span class="glyphicon glyphicon-plus"></span>
                 Insert
             </button>
             <button type="button" class="btn btn-danger btn-xs"
-                    data-ng-click="action.delete('{{modelName}}')"
-                    data-ng-disabled="!action.deleteEnabled('{{modelName}}')">
+                    data-ng-click="action.delete('{{model.name}}')"
+                    data-ng-disabled="!action.deleteEnabled('{{model.name}}')">
                 <span class="glyphicon glyphicon-trash"></span>
                 Delete
             </button>
             <button type="button" class="btn btn-xs"
-                    data-ng-click="action.previous('{{modelName}}')"
-                    data-ng-disabled="current.sets.{{modelName}}.currentIndex == 0">
+                    data-ng-click="action.previous('{{model.name}}')"
+                    data-ng-disabled="current.sets.{{model.name}}.currentIndex == 0">
                 <span class="glyphicon glyphicon-chevron-left"></span>
                 Previous
             </button>
             <button type="button" class="btn btn-xs"
-                    data-ng-click="action.next('{{modelName}}')"
-                    data-ng-disabled="current.sets.{{modelName}}.currentIndex == current.sets.{{modelName}}.rows.length - 1">
+                    data-ng-click="action.next('{{model.name}}')"
+                    data-ng-disabled="current.sets.{{model.name}}.currentIndex == current.sets.{{model.name}}.rows.length - 1">
                 Next
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
-            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{id}}.viewMode = 'multiple'"
-                    data-ng-show="PageCursor.sections.{{id}}.viewMode !== 'multiple'">
+            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{name}}.viewMode = 'multiple'"
+                    data-ng-show="PageCursor.sections.{{name}}.viewMode !== 'multiple'">
                 <span class="glyphicon glyphicon-th"></span>
                 Table View
             </button>
-            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{id}}.viewMode = 'single'"
-                    data-ng-show="PageCursor.sections.{{id}}.viewMode !== 'single'">
+            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{name}}.viewMode = 'single'"
+                    data-ng-show="PageCursor.sections.{{name}}.viewMode !== 'single'">
                 <span class="glyphicon glyphicon-file"></span>
                 Form View
             </button>
-    <span class="instance-count">
-        <span data-ng-bind="current.sets.{{modelName}}.currentIndex + 1"></span> of <span
-            data-ng-bind="current.sets.{{modelName}}.rows.length"></span>
-    </span>
+            <span class="instance-count">
+                <span data-ng-bind="current.sets.{{model.name}}.currentIndex + 1"></span> of <span
+                    data-ng-bind="current.sets.{{model.name}}.rows.length"></span>
+            </span>
         </div>
 
-        <div class="" data-ng-if="PageCursor.sections.{{id}}.viewMode === 'multiple'">
-            <!--<div class="tantalim-grid" ng-grid="PageCursor.views.{{id}}.gridOptions"></div>-->
-
+        <div class="" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'multiple'">
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
@@ -58,9 +57,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr data-ng-repeat="row in current.sets.{{modelName}}.rows"
-                        data-ng-click="action.select('{{modelName}}', $index)"
-                        data-ng-class="{success: row.id === current.instances.{{modelName}}.id}">
+                    <tr data-ng-repeat="row in current.sets.{{model.name}}.rows"
+                        data-ng-click="action.select('{{model.name}}', $index)"
+                        data-ng-class="{success: row.id === current.instances.{{model.name}}.id}">
                         {{#listFields}}
                         <td class="text-display">
                             <span class="text-view" data-ng-bind="row.data.{{fieldName}}"></span>
@@ -68,7 +67,7 @@
                         </td>
                         {{/listFields}}
                     </tr>
-                    <tr data-ng-hide="current.sets.{{modelName}}.rows.length">
+                    <tr data-ng-hide="current.sets.{{model.name}}.rows.length">
                         <td colspan="{{listFields.length}}">No Data Found</td>
                     </tr>
                     </tbody>
@@ -76,7 +75,7 @@
             </div>
         </div>
 
-        <form role="form" data-ng-if="PageCursor.sections.{{id}}.viewMode === 'single'">
+        <form role="form" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'single'">
             <div class="row">
                 {{#if splitFields}}
                 <div class="col-sm-3 hidden-xs">
@@ -89,9 +88,9 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr data-ng-repeat="row in current.sets.{{modelName}}.rows"
-                            data-ng-click="action.select('{{modelName}}', $index)"
-                            data-ng-class="{success: row.id === current.instances.{{modelName}}.id}">
+                        <tr data-ng-repeat="row in current.sets.{{model.name}}.rows"
+                            data-ng-click="action.select('{{model.name}}', $index)"
+                            data-ng-class="{success: row.id === current.instances.{{model.name}}.id}">
                             {{#splitFields}}
                             <td data-ng-bind="row.data.{{fieldName}}" class="nav"/>
                             {{/splitFields}}

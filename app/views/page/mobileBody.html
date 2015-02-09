@@ -29,17 +29,17 @@
 
 <div id="static-content" data-ng-show="staticContent" data-ng-bind="staticContent"></div>
 
-<div id="list-{{id}}" class="app-content" data-ng-show="!loading && currentPage == 'list-{{id}}'">
+<div id="list-{{name}}" class="app-content" data-ng-show="!loading && currentPage == 'list-{{id}}'">
     <div class="content-expanded" data-ng-hide="current.sets.{{modelName}}.rows.length">
         No Data Found
     </div>
     <div class="scrollable">
         <div class="scrollable-content">
             <div class="list-group">
-                <a href="#/detail/{{id}}/{{ngVar 'row.id'}}" class="list-group-item"
-                   data-ng-repeat="row in current.sets.{{modelName}}.rows">
+                <a href="#/detail/{{name}}/{{ngVar 'row.id'}}" class="list-group-item"
+                   data-ng-repeat="row in current.sets.{{model.name}}.rows">
                     {{#quickView}}
-                    <span data-ng-bind="row.data.{{fieldName}}"></span>
+                    <span data-ng-bind="row.data.{{field.name}}"></span>
                     {{/quickView}}
                     <i class="fa fa-chevron-right pull-right"></i>
                 </a>
@@ -47,7 +47,7 @@
         </div>
     </div>
 </div>
-<div id="detail-{{id}}" class="app-content" data-ng-show="!loading && currentPage == 'detail-{{id}}'"
+<div id="detail-{{name}}" class="app-content" data-ng-show="!loading && currentPage == 'detail-{{id}}'"
      ng-swipe-right="current.sets.{{modelName}}.movePrevious()"
      ng-swipe-left="current.sets.{{modelName}}.moveNext()">
     <div class="scrollable">
@@ -59,10 +59,10 @@
                 {{#formFields}}
                 <div class="form-group">
 
-                    <label for="{{../id}}-{{fieldName}}">{{fieldLabel}}</label>
+                    <label for="{{../name}}-{{fieldName}}">{{fieldLabel}}</label>
                     <input type="text" class="form-control" id="{{../id}}-{{fieldName}}"
-                           data-ng-model="current.instances.{{../modelName}}.data.{{fieldName}}"
-                           ng-change="rowChanged(current.instances.{{../modelName}})"
+                           data-ng-model="current.instances.{{../model.name}}.data.{{fieldName}}"
+                           ng-change="rowChanged(current.instances.{{../model.name}})"
                            {{#if disabled}}disabled{{/if}}
                     >
                 </div>
