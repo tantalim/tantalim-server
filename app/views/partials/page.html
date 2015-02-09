@@ -1,6 +1,6 @@
-<div id="form-view" data-ng-hide="searchMode()">
+<div id="form-view" data-ng-hide="searchController.showSearch">
     <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
-        <button data-ng-click="searchMode(true)" class="btn btn-default">
+        <button data-ng-click="searchController.turnSearchOn()" class="btn btn-default">
             <span class="glyphicon glyphicon-search"></span>
             Search View
         </button>

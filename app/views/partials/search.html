@@ -1,20 +1,16 @@
-<div id="search-view" data-ng-show="searchMode()">
+<div id="search-view" data-ng-show="searchController.showSearch">
     <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
-        <button data-ng-click="searchMode(false)" class="btn btn-default">
-            <span class="glyphicon glyphicon-th"></span>
-            Form View
-        </button>
-        <button data-ng-click="clear()" class="btn btn-default">
-            <span class="glyphicon glyphicon-repeat"></span>
-            Clear Search
+        <button data-ng-click="searchController.turnSearchOff()" class="btn btn-default">
+            <i class="fa fa-times"></i>
+            Cancel
         </button>
         <button data-ng-click="runSearch()" class="btn btn-success" data-ng-disabled="!filterValues">
-            <span class="glyphicon glyphicon-search"></span>
+            <i class="fa fa-search"></i>
             Search
         </button>
     </div>
 
-    <form class="form-horizontal" ng-submit="submit()">
+    <form class="form-horizontal" ng-submit="runSearch()">
         <div class="form-group col-xs-12">
             <label>Advanced Query Language</label>
             <textarea class="form-control" rows="4" data-ng-model="filterString"></textarea>
