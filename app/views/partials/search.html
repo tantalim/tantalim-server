@@ -1,14 +1,14 @@
-<div id="search-view" data-ng-show="searchMode">
+<div id="search-view" data-ng-show="searchMode()">
     <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
-        <button data-ng-click="searchMode = false" class="btn btn-default">
+        <button data-ng-click="searchMode(false)" class="btn btn-default">
             <span class="glyphicon glyphicon-th"></span>
             Form View
         </button>
-        <button data-ng-click="refresh()" class="btn btn-default">
+        <button data-ng-click="clear()" class="btn btn-default">
             <span class="glyphicon glyphicon-repeat"></span>
             Clear Search
         </button>
-        <button class="btn btn-success" data-ng-click="submit()" data-ng-disabled="!values">
+        <button data-ng-click="runSearch()" class="btn btn-success" data-ng-disabled="!filterValues">
             <span class="glyphicon glyphicon-search"></span>
             Search
         </button>
@@ -27,7 +27,7 @@
 
             <div class="col-xs-4">
                 <select class="form-control" id="search-{{fieldName}}-compare"
-                        ng-model="comparators.{{fieldName}}">
+                        ng-model="filterComparators.{{fieldName}}">
                     <option>Contains</option>
                     <option>Equals</option>
                     <option>BeginsWith</option>
@@ -35,7 +35,7 @@
                 </select>
             </div>
             <div class="col-xs-6">
-                <input type="text" class="form-control" id="search-{{fieldName}}" ng-model="values.{{fieldName}}">
+                <input type="text" class="form-control" id="search-{{fieldName}}" ng-model="filterValues.{{fieldName}}">
             </div>
         </div>
         {{/formFields}}
