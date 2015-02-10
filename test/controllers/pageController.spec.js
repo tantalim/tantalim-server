@@ -14,14 +14,14 @@ chai.should();
 chai.use(require('chai-as-promised'));
 
 describe('Page Controller', function () {
-    var controller, res,
-        user = {id: 'johndoe'},
+    var controller, res, req, user;
+
+    beforeEach(function () {
+        user = {id: 'johndoe'};
         req = {
             pageName: 'TestPage',
             user: user
         };
-
-    beforeEach(function () {
         menuService.buildMenuItems = BluebirdPromise.method(function () {
             return {};
         });
