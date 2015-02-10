@@ -190,6 +190,9 @@ function compile(modelDefinition) {
         if (modelDefinition.children) {
             logger.info('Parsing children');
             _.forEach(modelDefinition.children, function (child) {
+                if (_.isEmpty(child)) {
+                    throw Error('Model ' + modelDefinition.name + ' includes an empty child model. Please remove it.');
+                }
                 var link = child.parentLink;
                 if (_.isEmpty(link) || !link.parentField || !link.childField) {
                     throw Error('Child model ' + child.name + ' must define a parentLink');

@@ -12,11 +12,6 @@ function getColumnDefault(field) {
         if (field.basisColumn.columnDefault) {
             return field.basisColumn.columnDefault;
         }
-        if (field.basisColumn.default) {
-            logger.error('default is deprecated, please use columnDefault');
-            logger.error(field);
-            return field.basisColumn.default;
-        }
     }
     return null;
 }

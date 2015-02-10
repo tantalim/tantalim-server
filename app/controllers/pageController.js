@@ -30,9 +30,13 @@ exports.desktop = function (req, res, appLocals) {
         return;
     }
 
+    appLocals = appLocals || {};
+
     function renderDesktop(page, menu) {
         page.template = page.template || 'desktop';
-        page.css = page.css || appLocals.css;
+        if (page.css || appLocals.css) {
+            page.css = page.css || appLocals.css;
+        }
 
         return res.render(page.template, {
             appTitle: menu.appTitle || appLocals.title,

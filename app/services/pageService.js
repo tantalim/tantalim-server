@@ -91,7 +91,7 @@ function getArtifactFromCache(artifactType, moduleName, artifactName) {
                 logger.debug('catch getArtifactFromCache');
                 return getArtifactFromSrc(artifactType, moduleName, artifactName)
                     .then(function (data) {
-                        mkdirp(dir, function (err) {
+                        mkdirp(getArtifactDirectory(), function (err) {
                             if (err) throw err;
                             fs.writeFile(file, JSON.stringify(data), function (err) {
                                 if (err) throw err;
@@ -120,7 +120,7 @@ function getModuleName() {
 }
 
 function getDefinition(artifactType, artifactName) {
-    console.log('getDefinition %s %s', artifactType, artifactName);
+    //console.log('getDefinition %s %s', artifactType, artifactName);
     if (artifactName === undefined) {
         throw Error('Failed to get undefined ' + artifactType);
     }

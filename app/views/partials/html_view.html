@@ -62,7 +62,7 @@
                         data-ng-class="{success: row.id === current.instances.{{model.name}}.id}">
                         {{#listFields}}
                         <td class="text-display">
-                            <span class="text-view" data-ng-bind="row.data.{{fieldName}}"></span>
+                            <span class="text-view" data-ng-bind="row.data.{{fieldName}}{{#if filter}} | {{filter}}{{/if}}"></span>
                             <input type="text" class="text-edit" data-ng-model="row.data.{{fieldName}}">
                         </td>
                         {{/listFields}}

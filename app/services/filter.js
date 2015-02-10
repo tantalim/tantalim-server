@@ -4,7 +4,7 @@ var logger = require('../logger/default').main,
     _ = require('lodash'),
     knex = require('knex').knex;
 
-var patternEquals = /(.+) (=|IN|Contains|BeginsWith|EndsWith|>|<|Before|After) (.+)/i;
+var patternEquals = /(.+) (=|Equals|IN|Contains|BeginsWith|EndsWith|>|<|Before|After|GreaterThan|GreaterThanOrEqual|LessThan|LessThanOrEqual) (.+)/i;
 var patternAndOr = /(.+) (AND|OR) (.+)/i;
 var patternDateInterval = /(-?)(\d+)(\w+)/;
 
@@ -81,6 +81,9 @@ function apply(filterString, sql, fields) {
         logger.debug('equalsMatch: ' + equalsMatch);
         var fieldSql = toSql(equalsMatch[1], fields);
         switch (equalsMatch[2].toUpperCase()) {
+            case 'EQUALS':
+                sql.where(fieldSql, equalsMatch[3]);
+                break;
             case 'BEGINSWITH':
                 sql.where(fieldSql, 'like', equalsMatch[3] + '%');
                 break;
@@ -104,7 +107,7 @@ function apply(filterString, sql, fields) {
                 sql.where(fieldSql, equalsMatch[2], equalsMatch[3]);
         }
     } else {
-        logger.error('failed to parse filter: ' + filterString);
+        throw Error('failed to parse filter: ' + filterString);
     }
 }
 
