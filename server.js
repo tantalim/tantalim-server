@@ -21,14 +21,18 @@ var setup = function (custom) {
     var defaultConfig = {
         /**
          * The absolute path to the root of this web server
-         * TODO - We might need to change this to the tantalum-server root
          */
         serverRoot: rootPath,
         port: 3000,
         environment: process.env.NODE_ENV || 'development',
         sessionSecret: 'OVERRIDE_THIS_HASH_IN_YOUR_CONFIG',
         sessionCollection: 'sessions',
-        passportStrategy: null,
+        passportStrategies: {
+            local: true
+        },
+        configurePassport: function () {
+
+        },
         locals: {
             title: 'Tantalim Application'
         }
@@ -50,20 +54,7 @@ var setup = function (custom) {
         }
     });
 
-    if (config.passportStrategy) {
-        passport.use(config.passportStrategy);
-        passport.serializeUser(function (user, done) {
-            done(null, user.id);
-        });
-
-        passport.deserializeUser(function (id, done) {
-            done(null, {
-                id: 'demo',
-                displayName: 'Demo User',
-                provider: 'tantalim'
-            });
-        });
-    }
+    config.configurePassport(passport);
 };
 
 /**
@@ -160,7 +151,7 @@ var start = function () {
     // Setting the fav icon and static folder
     //app.use(express.favicon());
     app.use(express.static(config.appRoot + '/public'));
-    app.use('/bower_components',  express.static(config.appRoot + '/bower_components'));
+    app.use('/bower_components', express.static(config.appRoot + '/bower_components'));
 
     // Assume "not found" in the error msgs is a 404. this is somewhat
     // silly, but valid, you can do whatever you like, set properties,

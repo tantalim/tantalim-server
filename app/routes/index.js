@@ -57,17 +57,35 @@ function addLogins(app) {
     app.get('/login', function (req, res) {
         res.render('login', {
             appTitle: app.locals.title,
-            message: req.flash('error')
+            strategies: app.locals.passportStrategies,
+            error: req.flash('error'),
+            error_description: req.flash('error_description')
         });
     });
 
-    app.post('/login',
-        passport.authenticate('local', {
-            successRedirect: '/',
-            failureRedirect: '/login',
-            failureFlash: true
-        })
-    );
+    // TODO Adding these URLs for the strategies seems like it should belong in the custom app, but I'm not sure how to get them there and start up the app correctly.
+    if (app.locals.passportStrategies.local) {
+        app.post('/login',
+            passport.authenticate('local', {
+                successRedirect: '/',
+                failureRedirect: '/login',
+                failureFlash: true
+            })
+        );
+    }
+    if (app.locals.passportStrategies.github) {
+        app.get('/auth/github', passport.authenticate('github'));
+
+        app.get('/auth/github/callback',
+            passport.authenticate('github', {
+                successRedirect: '/',
+                failureRedirect: '/login',
+                failureFlash: true
+            }),
+            function (req, res) {
+                res.redirect('/');
+            });
+    }
 }
 
 module.exports = function (app) {
