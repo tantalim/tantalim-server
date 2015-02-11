@@ -4,7 +4,6 @@ var config = require('../config'),
     configAppRoot = '../' + config.appRoot + 'app/',
     proxyquire = require('proxyquire'),
     BluebirdPromise = require('bluebird'),
-    tableServiceProxy = {},
     chai = require('chai'),
     client = config.knex().client;
 
@@ -16,7 +15,6 @@ describe('Model Saver', function () {
 
     beforeEach(function () {
         saver = proxyquire(configAppRoot + 'services/modelSaver', {
-            './tableService': tableServiceProxy
         });
 
         this.modelDefinition = {

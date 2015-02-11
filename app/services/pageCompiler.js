@@ -13,22 +13,44 @@ function compile(pageDefinition) {
     logger.info('Starting compile', pageDefinition.name);
 
     function mapFields(pageDefinition) {
-        if (!pageDefinition.fields) {
-            logger.warn('Page `%s` had no fields', pageDefinition.name);
-            return;
-        }
+        pageDefinition.hasFormView = false;
+        pageDefinition.hasTableView = false;
+        pageDefinition.hasNavigation = false;
 
-        logger.info('Building %d field(s)', pageDefinition.fields.length);
+        if (pageDefinition.fields) {
+            logger.info('Building %d field(s)', pageDefinition.fields.length);
 
-        var modelFields = models[pageDefinition.model].fields;
-        _.forEach(pageDefinition.fields, function (pageField) {
-            var modelField = _.find(modelFields, function (modelField) {
-                if (pageField.name === modelField.name) {
-                    return modelField;
+            var modelFields = models[pageDefinition.model].fields;
+            _.forEach(pageDefinition.fields, function (pageField) {
+                var modelField = _.find(modelFields, function (modelField) {
+                    if (pageField.name === modelField.name) {
+                        return modelField;
+                    }
+                });
+                if (!modelField) {
+                    throw Error('Could not find basis column for ' + pageDefinition.name + '.' + pageField.name);
+                }
+                pageField = _.defaults(pageField, modelField, {
+                    fieldName: pageField.name, // Backwards compatibility
+                    label: pageField.name,
+                    showInNavigation: false,
+                    showInFormView: true,
+                    showInTableView: true
+                });
+                if (pageField.showInNavigation) {
+                    pageDefinition.hasNavigation = true;
+                }
+                if (pageField.showInFormView) {
+                    pageDefinition.hasFormView = true;
+                }
+                if (pageField.showInTableView) {
+                    pageDefinition.hasTableView = true;
                 }
             });
-            pageField = _.defaults(pageField, modelField);
-        });
+        } else {
+            logger.warn('Page `%s` had no fields', pageDefinition.name);
+        }
+        pageDefinition.hasBothViews = pageDefinition.hasFormView && pageDefinition.hasTableView;
     }
 
     function parseAndCompile(pageDefinition) {
@@ -36,6 +58,7 @@ function compile(pageDefinition) {
         var todo = [];
 
         pageDefinition.model = pageDefinition.model || pageDefinition.name;
+        pageDefinition.viewMode = pageDefinition.viewMode || 'form';
 
         if (!models[pageDefinition.model]) {
             todo.push(pageService.getDefinition(ARTIFACT.MODEL, pageDefinition.model)
@@ -53,6 +76,19 @@ function compile(pageDefinition) {
 
         if (todo.length === 0) {
             mapFields(pageDefinition);
+        }
+
+        if (pageDefinition.viewMode === 'multiple') {
+            logger.warn('`multiple` is not a valid viewMode anymore. Use `table`');
+            pageDefinition.viewMode = 'table';
+        }
+        if (pageDefinition.viewMode === 'single') {
+            logger.warn('`single` is not a valid viewMode. Use `form`');
+            pageDefinition.viewMode = 'form';
+        }
+        if (pageDefinition.viewMode === 'table' && !pageDefinition.hasTableView) {
+            logger.warn('viewMode is defined as table but has no visible table fields');
+            pageDefinition.viewMode = 'form';
         }
 
         return todo;

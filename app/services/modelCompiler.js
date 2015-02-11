@@ -57,6 +57,10 @@ function compile(modelDefinition) {
                     throw Error('Could not find basis column for ' + field.name + ' on ' + modelDefinition.name);
                 }
                 logger.debug('Mapped field: ' + field.name + ' to ' + basisColumn.name);
+                field = _.defaults(field, basisColumn, {
+                    required: false
+                });
+                // Keep this for backwards compatability
                 field.basisColumn = basisColumn;
             }
         });

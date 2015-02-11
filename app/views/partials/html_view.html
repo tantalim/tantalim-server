@@ -30,70 +30,79 @@
                 Next
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
-            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{name}}.viewMode = 'multiple'"
-                    data-ng-show="PageCursor.sections.{{name}}.viewMode !== 'multiple'">
+            {{#if hasBothViews}}
+            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{name}}.viewMode = 'table'"
+                    data-ng-show="PageCursor.sections.{{name}}.viewMode !== 'table'">
                 <span class="glyphicon glyphicon-th"></span>
                 Table View
             </button>
-            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{name}}.viewMode = 'single'"
-                    data-ng-show="PageCursor.sections.{{name}}.viewMode !== 'single'">
+            <button type="button" class="btn btn-default btn-xs" data-ng-click="PageCursor.sections.{{name}}.viewMode = 'form'"
+                    data-ng-show="PageCursor.sections.{{name}}.viewMode !== 'form'">
                 <span class="glyphicon glyphicon-file"></span>
                 Form View
             </button>
-            <span class="instance-count">
+            {{/if}}
+            <span class="instance-count" data-ng-show="current.sets.{{model.name}}.rows.length > 0">
                 <span data-ng-bind="current.sets.{{model.name}}.currentIndex + 1"></span> of <span
                     data-ng-bind="current.sets.{{model.name}}.rows.length"></span>
             </span>
         </div>
 
-        <div class="" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'multiple'" data-ng-click="chooseModel('{{model.name}}')">
+        <div class="" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'table'" data-ng-click="chooseModel('{{model.name}}')">
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
                     <tr>
-                        {{#listFields}}
-                        <th>{{fieldLabel}}</th>
-                        {{/listFields}}
+                        {{#fields}}
+                        {{#if showInTableView}}
+                        <th>{{label}}</th>
+                        {{/if}}
+                        {{/fields}}
                     </tr>
                     </thead>
                     <tbody>
                     <tr data-ng-repeat="row in current.sets.{{model.name}}.rows"
                         data-ng-click="action.select('{{model.name}}', $index)"
                         data-ng-class="{success: row.id === current.instances.{{model.name}}.id}">
-                        {{#listFields}}
+                        {{#fields}}
+                        {{#if showInTableView}}
                         <td class="text-display">
-                            <span class="text-view" data-ng-bind="row.data.{{fieldName}}{{#if filter}} | {{filter}}{{/if}}"></span>
-                            <input type="text" class="text-edit" data-ng-model="row.data.{{fieldName}}">
+                            <span class="text-view" data-ng-bind="row.data.{{name}}{{#if filter}} | {{filter}}{{/if}}"></span>
                         </td>
-                        {{/listFields}}
+                        {{/if}}
+                        {{/fields}}
                     </tr>
                     <tr data-ng-hide="current.sets.{{model.name}}.rows.length">
-                        <td colspan="{{listFields.length}}">No Data Found</td>
+                        <td colspan="{{fields.length}}">No Data Found</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <form role="form" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'single'" data-ng-click="chooseModel('{{model.name}}')">
+        <form role="form" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'form'" data-ng-click="chooseModel('{{model.name}}')">
             <div class="row">
-                {{#if splitFields}}
+                {{#if hasNavigation}}
                 <div class="col-sm-3 hidden-xs">
                     <table class="table table-bordered col-sm-4">
                         <thead>
                         <tr>
-                            {{#splitFields}}
-                            <th>{{fieldLabel}}</th>
-                            {{/splitFields}}
+                            {{#fields}}
+                            {{#if showInNavigation}}
+                            <th>{{label}}</th>
+                            {{/if}}
+                            {{/fields}}
                         </tr>
                         </thead>
                         <tbody>
                         <tr data-ng-repeat="row in current.sets.{{model.name}}.rows"
                             data-ng-click="action.select('{{model.name}}', $index)"
                             data-ng-class="{success: row.id === current.instances.{{model.name}}.id}">
-                            {{#splitFields}}
-                            <td data-ng-bind="row.data.{{fieldName}}" class="nav"/>
-                            {{/splitFields}}
+                            {{#fields}}
+                            {{#if showInNavigation}}
+                            <td data-ng-bind="row.data.{{name}}" class="nav"/>
+                            {{/if}}
+                            {{/fields}}
                         </tr>
                         </tbody>
                     </table>

@@ -10,7 +10,7 @@ var config = require('../config'),
 chai.Should();
 chai.use(require('chai-as-promised'));
 
-describe.only('Page Compiler', function () {
+describe('Page Compiler', function () {
     var compiler, PersonModel;
 
     beforeEach(function () {
@@ -21,8 +21,7 @@ describe.only('Page Compiler', function () {
             name: 'Person',
             fields: [
                 {name: 'PersonID', required: true},
-                {name: 'Name', required: true},
-                {name: 'ParentID', required: true}
+                {name: 'Name'}
             ]
         };
     });
@@ -37,23 +36,43 @@ describe.only('Page Compiler', function () {
         });
     };
 
-    it('should default from name if model is missing', function () {
-        return compiler.compile({name: 'Person'}).should.eventually.eql({
+    it.only('should default from name if model is missing', function () {
+        return compiler.compile({
+            name: 'Person'
+        }).should.eventually.eql({
             name: 'Person',
-            model: 'Person'
+            model: 'Person',
+            viewMode: 'form',
+            hasBothViews: false,
+            hasFormView: false,
+            hasTableView: false,
+            hasNavigation: false
         });
+    });
+
+    it('should error if field is missing', function () {
+        return compiler.compile({
+            name: 'Person',
+            fields: [{
+                name: 'FieldNotInModel'
+            }]
+        }).should.eventually.be.rejectedWith(Error, 'Could not find basis column for Person.FieldNotInModel');
     });
 
     it('should add field definition', function () {
         return compiler.compile({
             name: 'Person',
-            model: 'Person',
             fields: [{
                 name: 'PersonID'
             }]
         }).should.eventually.have.property('fields').eql([{
                 name: 'PersonID',
-                required: true
+                fieldName: 'PersonID',
+                label: 'PersonID',
+                required: true,
+                showInNavigation: false,
+                showInFormView: true,
+                showInTableView: true
             }]);
     });
 });
