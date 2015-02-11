@@ -11,33 +11,33 @@ chai.Should();
 chai.use(require('chai-as-promised'));
 
 describe('Model Compiler', function () {
-    var compiler;
+    var compiler, PersonTable;
 
     beforeEach(function () {
         compiler = proxyquire(configAppRoot + 'services/modelCompiler', {
             './pageService': pageService
         });
+        PersonTable = {
+            name: 'Person',
+            dbName: 'person',
+            primaryKey: 'PersonID',
+            columns: [
+                {name: 'PersonID'},
+                {name: 'Name', required: true},
+                {name: 'ParentID'}
+            ],
+            joins: [{
+                name: 'Parent',
+                table: 'Person',
+                required: false,
+                columns: [{
+                    from: 'ParentID',
+                    to: 'PersonID'
+                }]
+            }]
+        };
     });
 
-    var PersonTable = {
-        name: 'Person',
-        dbName: 'person',
-        primaryKey: 'PersonID',
-        columns: [
-            {name: 'PersonID'},
-            {name: 'Name'},
-            {name: 'ParentID'}
-        ],
-        joins: [{
-            name: 'Parent',
-            table: 'Person',
-            required: false,
-            columns: [{
-                from: 'ParentID',
-                to: 'PersonID'
-            }]
-        }]
-    };
     pageService.getDefinition = function (artifactType, artifactName) {
         return new BluebirdPromise(function (resolve) {
             if (artifactName === PersonTable.name) {
@@ -51,17 +51,19 @@ describe('Model Compiler', function () {
     it('should error if basisTable is missing', function () {
         return compiler.compile({}).should.be.rejectedWith(Error, 'basisTable is required');
     });
-    it('should compile simple', function () {
+    it('should compile basisTable', function () {
         return compiler.compile({
-            basisTable: 'Person'
-        }).should.eventually.eql({
-                basisTable: {
-                    name: 'Person',
-                    dbName: 'person'
-                }
+            basisTable: 'Person',
+            fields: [{
+                name: 'PersonPersonID',
+                basisColumn: 'PersonID'
+            }]
+        }).should.eventually.have.property('basisTable').eql({
+                name: 'Person',
+                dbName: 'person'
             });
     });
-    it('should error if column is missing', function () {
+    it('should error if basis column can\'t be found', function () {
         return compiler.compile({
             name: 'PersonModel',
             basisTable: 'Person',
@@ -69,7 +71,7 @@ describe('Model Compiler', function () {
                 {
                     name: 'PersonNotHere',
                     basisColumn: 'NotHere'
-                },
+                }
             ]
         }).should.be.rejectedWith(Error, 'Could not find basis column for PersonNotHere on PersonModel');
     });
@@ -82,22 +84,16 @@ describe('Model Compiler', function () {
                     basisColumn: 'Name'
                 }
             ]
-        }).should.eventually.eql({
-                basisTable: {
-                    name: 'Person',
-                    dbName: 'person'
-                },
-                fields: [
-                    {
-                        name: 'PersonName',
-                        basisTable: 'Person',
-                        stepCount: 0,
-                        basisColumn: {
-                            name: 'Name'
-                        }
+        }).should.eventually.have.property('fields').eql([
+                {
+                    name: 'PersonName',
+                    basisTable: 'Person',
+                    stepCount: 0,
+                    basisColumn: {
+                        name: 'Name', required: true
                     }
-                ]
-            });
+                }
+            ]);
     });
     it('should add instanceID', function () {
         return compiler.compile({
@@ -108,29 +104,13 @@ describe('Model Compiler', function () {
                     basisColumn: 'PersonID'
                 }
             ]
-        }).should.eventually.eql({
-                basisTable: {
-                    name: 'Person',
-                    dbName: 'person'
-                },
-                instanceID: {
-                    name: 'PersonPersonID',
-                    basisTable: 'Person',
-                    stepCount: 0,
-                    basisColumn: {
-                        name: 'PersonID'
-                    }
-                },
-                fields: [
-                    {
-                        name: 'PersonPersonID',
-                        basisTable: 'Person',
-                        stepCount: 0,
-                        basisColumn: {
-                            name: 'PersonID'
-                        }
-                    }
-                ]
+        }).should.eventually.have.property('instanceID').eql({
+                name: 'PersonPersonID',
+                basisTable: 'Person',
+                stepCount: 0,
+                basisColumn: {
+                    name: 'PersonID'
+                }
             });
     });
     it('should add join', function () {
@@ -184,14 +164,14 @@ describe('Model Compiler', function () {
                         step: 'p',
                         stepCount: 1,
                         basisColumn: {
-                            name: 'Name'
+                            name: 'Name', required: true
                         }
                     }
                 ]
             });
     });
-    // TODO Create test for multiple joins A -> B -> C
-    it('should add multiple joins', function () {
+    it.skip('should add multiple joins', function () {
+        // TODO Create test for multiple joins A -> B -> C
     });
     it('should require parentLink', function () {
         return compiler.compile({
@@ -243,60 +223,36 @@ describe('Model Compiler', function () {
                     }
                 ]
             }]
-        }).should.eventually.eql({
+        }).should.eventually.have.property('children').eql([{
+                name: 'Child',
                 basisTable: {
                     name: 'Person',
                     dbName: 'person'
                 },
-                instanceID: {
-                    name: 'PersonPersonID',
-                    stepCount: 0,
-                    basisTable: 'Person',
-                    basisColumn: {
-                        name: 'PersonID'
-                    }
+                parentLink: {
+                    parentField: 'PersonPersonID',
+                    childField: 'ChildParentID'
                 },
                 fields: [
                     {
-                        name: 'PersonPersonID',
+                        name: 'ChildName',
                         stepCount: 0,
                         basisTable: 'Person',
                         basisColumn: {
-                            name: 'PersonID'
+                            name: 'Name', required: true
+                        }
+                    },
+                    {
+                        name: 'ChildParentID',
+                        stepCount: 0,
+                        basisTable: 'Person',
+                        basisColumn: {
+                            name: 'ParentID'
                         }
                     }
-                ],
-                children: [{
-                    name: 'Child',
-                    basisTable: {
-                        name: 'Person',
-                        dbName: 'person'
-                    },
-                    parentLink: {
-                        parentField: 'PersonPersonID',
-                        childField: 'ChildParentID'
-                    },
-                    fields: [
-                        {
-                            name: 'ChildName',
-                            stepCount: 0,
-                            basisTable: 'Person',
-                            basisColumn: {
-                                name: 'Name'
-                            }
-                        },
-                        {
-                            name: 'ChildParentID',
-                            stepCount: 0,
-                            basisTable: 'Person',
-                            basisColumn: {
-                                name: 'ParentID'
-                            }
-                        }
 
-                    ]
-                }]
-            });
+                ]
+            }]);
     });
 
 });

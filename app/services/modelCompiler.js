@@ -71,7 +71,7 @@ function compile(modelDefinition) {
             if (instanceID) {
                 modelDefinition.instanceID = instanceID;
             } else {
-                logger.warn('Field matching primaryKey column wasn\'t included in the model: ' + primaryKey.name);
+                logger.info('Field matching primaryKey column wasn\'t included in the model: ' + primaryKey.name);
             }
         }
 
