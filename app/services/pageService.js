@@ -5,6 +5,7 @@ var logger = require('../logger/default').main,
     fs = BluebirdPromise.promisifyAll(require('fs')),
     mkdirp = require('mkdirp'),
     errors = require('../errors'),
+    pageCompiler = require('./pageCompiler'),
     modelCompiler = require('./modelCompiler'),
     menuCompiler = require('./menuCompiler');
 
@@ -23,8 +24,19 @@ function getArtifactDirectory(moduleName) {
 }
 
 function getArtifactFromSrc(artifactType, moduleName, artifactName) {
+
+    var trace = {
+        method: 'getArtifactFromSrc',
+        filename: __filename,
+        params: [artifactType, moduleName, artifactName]
+    };
+
     // TODO Double check variables for injection
-    return new BluebirdPromise(function (resolve, reject) {
+    return new BluebirdPromise(function (resolve, bbReject) {
+        var reject = function(err) {
+            errors.addTrace(err, trace);
+            bbReject(err);
+        };
         var file = getArtifactDirectory() + 'src/' + artifactType + 's/' + artifactName + '.json';
 
         logger.debug('reading file from ' + file);
@@ -38,28 +50,17 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                     case ARTIFACT.MODEL:
                         modelCompiler.compile(jsonData)
                             .then(resolve)
-                            .catch(function(err) {
-                                console.log('error', err);
-                                errors.addTrace(err, {
-                                    method: 'getArtifactFromSrc',
-                                    filename: __filename
-                                });
-                                reject(err);
-                            });
+                            .catch(reject);
                         break;
                     case ARTIFACT.MENU:
                         menuCompiler.compile(jsonData)
                             .then(resolve)
-                            .catch(function(err) {
-                                console.log('error', err);
-                                errors.addTrace(err, {
-                                    method: 'getArtifactFromSrc',
-                                    filename: __filename
-                                });
-                                reject(err);
-                            });
+                            .catch(reject);
                         break;
                     case ARTIFACT.PAGE:
+                        pageCompiler.compile(jsonData)
+                            .then(resolve)
+                            .catch(reject);
                         resolve(jsonData);
                         break;
 
@@ -67,14 +68,7 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                         resolve(jsonData);
                 }
             })
-            .catch(function(err) {
-                console.log('error', err);
-                errors.addTrace(err, {
-                    method: 'getArtifactFromSrc',
-                    filename: __filename
-                });
-                reject(err);
-            });
+            .catch(reject);
     });
 }
 
@@ -146,10 +140,10 @@ function getDefinition(artifactType, artifactName) {
             })
             .then(resolve)
             .catch(function(err) {
-                console.log('error', err);
                 errors.addTrace(err, {
                     method: 'getDefinition',
-                    filename: __filename
+                    filename: __filename,
+                    params: [artifactType, artifactName]
                 });
                 reject(err);
             });
