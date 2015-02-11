@@ -25,21 +25,20 @@
     <![endif]-->
 </head>
 <body data-ng-controller="PageController">
-{{> menu}}
 <div id="loading" class="text-center" data-ng-show="showLoadingScreen">
     <div id="loadingMessage" class="col-sm-8 col-sm-offset-2">
         <h1>
             <i class="fa fa-spinner fa-spin" data-ng-hide="serverError"></i>
             Loading {{page.title}}
         </h1>
-        <div class="alert alert-danger ng-hide" data-ng-show="serverError" data-ng-bind-html="serverError"></div>
-        <button class="btn btn-default ng-hide" data-ng-show="serverError" data-ng-click="showLoadingScreen = false">
+        <div class="alert alert-danger ng-cloak" data-ng-show="serverError" data-ng-bind-html="serverError"></div>
+        <button class="btn btn-default ng-cloak" data-ng-show="serverError" data-ng-click="showLoadingScreen = false">
             <i class="fa fa-times"></i>
             Close
         </button>
     </div>
 </div>
-<section class="content container ng-hide" data-ng-hide="showLoadingScreen">
+<section class="content container ng-cloak" data-ng-show="!showLoadingScreen">
     <div id="page-body">
         <div id="server-status" class="alert alert-warning" data-ng-show="serverStatus" data-ng-bind="serverStatus"></div>
         <div id="server-error" class="alert alert-danger" data-ng-show="serverError" data-ng-bind-html="serverError"
@@ -52,6 +51,7 @@
         </a>
     </div>
 </section>
+{{> menu}}
 
 <!-- Bootstrap JS -->
 <script type="text/javascript" src="/bower_components/jquery/dist/jquery.js"></script>
