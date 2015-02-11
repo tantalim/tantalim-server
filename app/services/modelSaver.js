@@ -142,7 +142,7 @@ function updateData(modelDefinition, row) {
             var sqlReadyRow = {};
             _.forEach(modelDefinition.fields, function (field) {
                 if (included(field)) {
-                    logger.debug('Preparing to save field: ', field);
+                    logger.debug('Preparing to save field: ', field.name);
                     var sqlReadyValue,
                         hardDefault = getColumnHardDefaultOnUpdate(field);
                     if (hardDefault) {
@@ -158,7 +158,7 @@ function updateData(modelDefinition, row) {
                     }
                 }
             });
-            logger.debug('built sqlReadyRow ', JSON.stringify(sqlReadyRow));
+            logger.debug('built sqlReadyRow ', sqlReadyRow);
             return sqlReadyRow;
         })();
 
@@ -230,6 +230,10 @@ exports.save = function (modelDefinition, data) {
     return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting modelSaver.save() on %s', modelDefinition.name);
 //        logger.debug(data);
+        if (!knex) {
+            logger.warn('requiring knex again, since somehow it\'s getting destroyed');
+            knex = require('knex').knex;
+        }
 
         if (!modelDefinition.instanceID) {
             throw Error('Cannot insert/update/delete an instance without an instanceID for ' + modelDefinition.name);

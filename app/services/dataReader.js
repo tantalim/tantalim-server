@@ -27,6 +27,10 @@ function convertModelToKnexSql(model) {
     logger.debug('starting convertModelToKnexSql for ' + model.name);
     //logger.debug(JSON.stringify(model));
 
+    if (!knex) {
+        logger.warn('requiring knex again, since somehow it\'s getting destroyed');
+        knex = require('knex').knex;
+    }
     var sql = knex(model.basisTable.dbName + ' as t0');
 
     if (_.isArray(model.steps)) {
