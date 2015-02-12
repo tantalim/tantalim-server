@@ -8,8 +8,10 @@
     </div>
     <div data-ng-show="action.length('{{model.name}}')">
         <div class="form-group">
-            <button type="button" class="btn btn-primary btn-xs" data-ng-click="action.insert('{{model.name}}')">
-                <span class="glyphicon glyphicon-plus"></span>
+            <button type="button" class="btn btn-primary btn-xs"
+                    data-ng-click="action.insert('{{model.name}}')"
+                    data-ng-disabled="TopPageForm.$invalid">
+            <span class="glyphicon glyphicon-plus"></span>
                 Insert
             </button>
             <button type="button" class="btn btn-danger btn-xs"
@@ -20,13 +22,13 @@
             </button>
             <button type="button" class="btn btn-xs"
                     data-ng-click="action.previous('{{model.name}}')"
-                    data-ng-disabled="current.sets.{{model.name}}.currentIndex == 0">
+                    data-ng-disabled="current.sets.{{model.name}}.currentIndex == 0 || TopPageForm.$invalid">
                 <span class="glyphicon glyphicon-chevron-left"></span>
                 Previous
             </button>
             <button type="button" class="btn btn-xs"
                     data-ng-click="action.next('{{model.name}}')"
-                    data-ng-disabled="current.sets.{{model.name}}.currentIndex == current.sets.{{model.name}}.rows.length - 1">
+                    data-ng-disabled="current.sets.{{model.name}}.currentIndex == current.sets.{{model.name}}.rows.length - 1 || TopPageForm.$invalid">
                 Next
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
@@ -63,6 +65,7 @@
                     <tbody>
                     <tr data-ng-repeat="row in current.sets.{{model.name}}.rows"
                         data-ng-click="action.select('{{model.name}}', $index)"
+                        data-ng-dblclick="PageCursor.sections.{{name}}.viewMode = 'form'"
                         data-ng-class="{success: row.id === current.instances.{{model.name}}.id}">
                         {{#fields}}
                         {{#if showInTableView}}
