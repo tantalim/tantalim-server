@@ -230,9 +230,9 @@ function compile(modelDefinition) {
                 })
                 .catch(function(err) {
                     errors.addTrace(err, {
-                        method: 'getDefinition',
+                        method: 'compile',
                         filename: __filename,
-                        params: [artifactType, artifactName]
+                        params: [modelDefinition.name]
                     });
                     reject(err);
                 });

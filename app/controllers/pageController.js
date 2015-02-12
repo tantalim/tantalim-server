@@ -156,7 +156,7 @@ exports.mobileBody = function (req, res) {
         });
 };
 
-exports.artifactDefinition = function (req, res, appLocals) {
+exports.artifactDefinition = function (req, res) {
     if (!req.user) {
         res.redirect('/login');
         return;

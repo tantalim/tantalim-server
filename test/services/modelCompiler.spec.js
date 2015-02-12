@@ -88,6 +88,7 @@ describe('Model Compiler', function () {
                 {
                     name: 'PersonName',
                     basisTable: 'Person',
+                    label: 'Name',
                     required: true,
                     stepCount: 0,
                     basisColumn: {
@@ -107,6 +108,7 @@ describe('Model Compiler', function () {
             ]
         }).should.eventually.have.property('instanceID').eql({
                 name: 'PersonPersonID',
+                label: 'PersonID',
                 basisTable: 'Person',
                 required: false,
                 stepCount: 0,
@@ -162,6 +164,7 @@ describe('Model Compiler', function () {
                 fields: [
                     {
                         name: 'ParentName',
+                        label: 'Name',
                         basisTable: 'Person',
                         step: 'p',
                         required: true,
@@ -239,6 +242,7 @@ describe('Model Compiler', function () {
                 fields: [
                     {
                         name: 'ChildName',
+                        label: 'Name',
                         stepCount: 0,
                         basisTable: 'Person',
                         required: true,
@@ -248,6 +252,7 @@ describe('Model Compiler', function () {
                     },
                     {
                         name: 'ChildParentID',
+                        label: 'ParentID',
                         stepCount: 0,
                         required: false,
                         basisTable: 'Person',
