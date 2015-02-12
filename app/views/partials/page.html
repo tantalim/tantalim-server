@@ -1,4 +1,4 @@
-<div id="form-view" data-ng-hide="searchController.showSearch">
+<form id="form-view" role="form" name="TopPageForm" data-ng-hide="searchController.showSearch">
     <div class="page-nav navbar navbar-inverse navbar-fixed-bottom">
         <button data-ng-click="searchController.turnSearchOn()" class="btn btn-default">
             <span class="glyphicon glyphicon-search"></span>
@@ -8,11 +8,11 @@
             <span class="glyphicon glyphicon-refresh"></span>
             Refresh
         </button>
-        <button type="submit" data-ng-click="save()" class="btn btn-success" data-ng-disabled="!ModelCursor.dirty">
+        <button type="submit" data-ng-click="save()" class="btn btn-success" data-ng-disabled="!ModelCursor.dirty || TopPageForm.$invalid">
             <span class="glyphicon glyphicon-floppy-disk"></span>
             Save
         </button>
     </div>
 
     {{> html_view }}
-</div>
+</form>

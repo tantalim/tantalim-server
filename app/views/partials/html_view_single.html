@@ -8,9 +8,9 @@
                ng-change="rowChanged(current.instances.{{../../../model.name}})"
                {{#if blurFunction}}ng-blur="{{blurFunction}}"{{/if}}
                {{#if placeholder}}placeholder="{{placeholder}}"{{/if}}
-               {{#if required}}required{{/if}}
+               {{#if required}}ng-required="current.instances.{{../../../../model.name}}"{{/if}}
                {{#if disabled}}disabled{{/if}}
-               {{#if help}}aria-describedby="help-{{../../../model.name}}-{{name}}"{{/if}}
+               {{#if help}}aria-describedby="help-{{../../../../model.name}}-{{name}}"{{/if}}
         >
         {{#links}}<a href="" data-ng-click="link('{{page}}', '{{filter}}', '{{../../../../model.name}}')">{{title}}</a>{{/links}}
         {{#if help}}<span id="help-{{../../../model.name}}-{{name}}" class="help-block">{{help}}</span>{{/if}}
