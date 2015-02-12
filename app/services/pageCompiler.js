@@ -81,37 +81,75 @@ function mergeModelIntoPage(modelDefinition, pageDefinition) {
     }
 }
 
+function pageRequiresModel(pageDefinition) {
+    if (pageDefinition.model) {
+        return true;
+    }
+    if (pageDefinition.template === 'html') {
+        return false;
+    }
+    return true;
+}
+
 exports.compile = function (pageDefinition) {
     var ARTIFACT = pageService.ARTIFACT; // Easy alias
 
     logger.info('Starting page compile', pageDefinition.name);
 
     return new BluebirdPromise(function (resolve, reject) {
-        pageDefinition.model = pageDefinition.model || pageDefinition.name;
 
-        pageService.getDefinition(ARTIFACT.MODEL, pageDefinition.model)
-            .then(function (modelDefinition) {
-                mergeModelIntoPage(modelDefinition, pageDefinition);
-                resolve(pageDefinition);
-            })
-            .catch(function(err) {
-                errors.addTrace(err, {
-                    method: 'getDefinition',
-                    filename: __filename,
-                    params: [artifactType, artifactName]
+        if (pageRequiresModel(pageDefinition)) {
+            pageDefinition.model = pageDefinition.model || pageDefinition.name;
+
+            pageService.getDefinition(ARTIFACT.MODEL, pageDefinition.model)
+                .then(function (modelDefinition) {
+                    mergeModelIntoPage(modelDefinition, pageDefinition);
+                    resolve(pageDefinition);
+                })
+                .catch(function (err) {
+                    errors.addTrace(err, {
+                        method: 'getDefinition',
+                        filename: __filename,
+                        params: [ARTIFACT.MODEL, pageDefinition.model]
+                    });
+                    reject(err);
                 });
-                reject(err);
-            });
+        } else {
+            resolve(pageDefinition);
+        }
 
         logger.info('built promise for ' + pageDefinition.name);
     });
 };
 
-exports.prunePageDefinitionForClient = function (original) {
-    var pruned = {
-        model: {
-            name: original.model.name
+exports.prunePageDefinitionForClient = function (topOriginal) {
+    function mapModel(original) {
+        var pruned = {
+            name: original.name,
+            fields: _.map(original.fields, function(field) {
+                return _.pick(field, ['name', 'fieldDefault']);
+            })
+        };
+        if (original.children) {
+            pruned.children = _.map(original.children, function (child) {
+                return mapModel(child);
+            });
         }
-    };
-    return JSON.stringify(pruned);
+        return pruned;
+    }
+
+    function mapPage(original) {
+        var pruned = {
+            name: original.name,
+            viewMode: original.viewMode,
+            model: mapModel(original.model)
+        };
+        if (original.children) {
+            pruned.children = _.map(original.children, function (child) {
+                return mapPage(child);
+            });
+        }
+        return pruned;
+    }
+    return JSON.stringify(mapPage(topOriginal));
 };
