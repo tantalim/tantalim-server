@@ -80,8 +80,7 @@
             </div>
         </div>
 
-        <form role="form" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'form'" data-ng-click="chooseModel('{{model.name}}')">
-            <div class="row">
+        <div class="row" data-ng-if="PageCursor.sections.{{name}}.viewMode === 'form'" data-ng-click="chooseModel('{{model.name}}')">
                 {{#if hasNavigation}}
                 <div class="col-sm-3 hidden-xs">
                     <table class="table table-bordered col-sm-4">
@@ -118,7 +117,6 @@
                 {{/if}}
 
             </div>
-        </form>
 
         {{#children}}
         <div style="padding-left: 15px">

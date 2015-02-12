@@ -1,16 +1,22 @@
 {{#fields}}
 {{#if showInFormView}}
-<div class="form-group">
+<div class="form-group" ng-class="{'has-error': TopPageForm.{{name}}.$invalid}">
     {{#fieldType fieldType 'text'}}
-        <label for="{{../../../model.name}}-{{name}}">{{label}}</label>
-        <input type="text" class="form-control" id="{{../../../model.name}}-{{name}}"
+        <label class="control-label" for="{{../../../model.name}}-{{name}}">{{label}}</label>
+        <input type="text" class="form-control" id="{{../../../model.name}}-{{name}}" name="{{name}}"
                data-ng-model="current.instances.{{../../../model.name}}.data.{{name}}"
+               ng-change="rowChanged(current.instances.{{../../../model.name}})"
+               {{#if blurFunction}}ng-blur="{{blurFunction}}"{{/if}}
+               {{#if placeholder}}placeholder="{{placeholder}}"{{/if}}
                {{#if required}}required{{/if}}
                {{#if disabled}}disabled{{/if}}
+               {{#if help}}aria-describedby="help-{{../../../model.name}}-{{name}}"{{/if}}
         >
+        {{#links}}<a href="" data-ng-click="link('{{page}}', '{{filter}}', '{{../../../../model.name}}')">{{title}}</a>{{/links}}
+        {{#if help}}<span id="help-{{../../../model.name}}-{{name}}" class="help-block">{{help}}</span>{{/if}}
     {{/fieldType}}
     {{#fieldType fieldType 'select'}}
-        <label for="{{../../../model.name}}-{{fieldName}}">{{label}}</label>
+        <label class="control-label" for="{{../../../model.name}}-{{fieldName}}">{{label}}</label>
         <ui-select
                 current="current.instances.{{../../../model.name}}.data"
                 item-model="{{select.model}}"
@@ -24,7 +30,7 @@
     {{/fieldType}}
     {{#fieldType fieldType 'checkbox'}}
         <div class="checkbox">
-            <label class="ui-checkbox" for="{{../../../model.name}}-{{fieldName}}">
+            <label class="control-label" class="ui-checkbox" for="{{../../../model.name}}-{{fieldName}}">
                 <input type="checkbox" id="{{../../../model.name}}-{{fieldName}}"
                        data-ng-model="current.instances.{{../../../model.name}}.data.{{fieldName}}"
                        ng-change="rowChanged(current.instances.{{../../../model.name}}, '{{fieldName}}')">
