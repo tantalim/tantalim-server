@@ -1,17 +1,38 @@
-{% extends 'layouts/default.html' %}
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" ng-app="tantalim.desktop">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-{% block main %}
-    <h1>Oops something went wrong</h1>
-    <br>
-    <span>404</span>
-{% endblock %}
+    <title>Page Not Found</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/img/icons/favicon.ico" rel="shortcut icon" type="image/x-icon">
 
-{% block content %}
-    <div id="error-message-box">
-        <div id="error-stack-trace">
-            <pre>
-                <code>{{error}}</code>
-            </pre>
-        </div>
+    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bower_components/tantalim-client/public/css/common.css">
+    {{#if css}}
+    <link rel="stylesheet" href="{{ css }}">
+    {{/if}}
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+<section class="content container">
+    <div class="jumbotron col-sm-6 col-sm-offset-3 text-center">
+        <h1>404</h1>
+        <h3>Page Not Found</h3>
+        <hr>
+        <p>
+            <a href="/" class="btn btn-primary btn-lg">Back Home</a>
+        </p>
     </div>
-{% endblock %}
+</section>
+
+
+<!-- Bootstrap JS -->
+<script type="text/javascript" src="/bower_components/jquery/dist/jquery.js"></script>
+<script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+</body>
+</html>
