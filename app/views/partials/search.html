@@ -21,13 +21,14 @@
         </div>
 
         <!-- We might want to consider changing this from #formFields to a new #searchFields option -->
-        {{#formFields}}
+        {{#fields}}
+        {{#if searchable}}
         <div class="form-group col-xs-12">
-            <label for="search-{{fieldName}}" class="col-xs-2 control-label">{{fieldLabel}}</label>
+            <label for="search-{{name}}" class="col-xs-2 control-label">{{label}}</label>
 
             <div class="col-xs-4">
-                <select class="form-control" id="search-{{fieldName}}-compare"
-                        ng-model="filterComparators.{{fieldName}}">
+                <select class="form-control" id="search-{{name}}-compare"
+                        ng-model="filterComparators.{{name}}">
                     <option>Contains</option>
                     <option>Equals</option>
                     <option>BeginsWith</option>
@@ -35,9 +36,10 @@
                 </select>
             </div>
             <div class="col-xs-6">
-                <input type="text" class="form-control" id="search-{{fieldName}}" ng-model="filterValues.{{fieldName}}">
+                <input type="text" class="form-control" id="search-{{name}}" ng-model="filterValues.{{name}}">
             </div>
         </div>
-        {{/formFields}}
+        {{/if}}
+        {{/fields}}
     </form>
 </div>

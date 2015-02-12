@@ -21,6 +21,10 @@ function addUserPages(app) {
         pageController.desktop(req, res, app.locals);
     });
 
+    app.get('/artifact/:artifactType/:artifactName', function (req, res) {
+        pageController.artifactDefinition(req, res);
+    });
+
     app.get('/', function (req, res) {
         req.pageName = 'Home'; // TODO get this 'Home' from the menu default
         pageController.desktop(req, res, app.locals);

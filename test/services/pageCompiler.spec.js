@@ -22,7 +22,14 @@ describe('Page Compiler', function () {
             fields: [
                 {name: 'PersonID', required: true},
                 {name: 'Name'}
-            ]
+            ],
+            children: [{
+                name: 'Child',
+                fields: [
+                    {name: 'ChildID'},
+                    {name: 'ChildName'}
+                ]
+            }]
         };
     });
 
@@ -36,18 +43,18 @@ describe('Page Compiler', function () {
         });
     };
 
-    it.only('should default from name if model is missing', function () {
+    it('should default from name if model is missing', function () {
         return compiler.compile({
             name: 'Person'
         }).should.eventually.eql({
-            name: 'Person',
-            model: 'Person',
-            viewMode: 'form',
-            hasBothViews: false,
-            hasFormView: false,
-            hasTableView: false,
-            hasNavigation: false
-        });
+                name: 'Person',
+                model: 'Person',
+                viewMode: 'form',
+                hasBothViews: false,
+                hasFormView: false,
+                hasTableView: false,
+                hasNavigation: false
+            });
     });
 
     it('should error if field is missing', function () {
@@ -56,7 +63,7 @@ describe('Page Compiler', function () {
             fields: [{
                 name: 'FieldNotInModel'
             }]
-        }).should.eventually.be.rejectedWith(Error, 'Could not find basis column for Person.FieldNotInModel');
+        }).should.eventually.be.rejectedWith(Error, 'Could not find field in model for Person.FieldNotInModel');
     });
 
     it('should add field definition', function () {
@@ -72,7 +79,40 @@ describe('Page Compiler', function () {
                 required: true,
                 showInNavigation: false,
                 showInFormView: true,
-                showInTableView: true
+                showInTableView: true,
+                searchable: true
+            }]);
+    });
+
+    it('should add child definition', function () {
+        return compiler.compile({
+            name: 'Person',
+            fields: [{
+                name: 'PersonID'
+            }],
+            children: [{
+                name: 'Child',
+                fields: [{
+                    name: 'ChildID'
+                }]
+            }]
+        }).should.eventually.have.property('children').eql([{
+                name: 'Child',
+                model: 'Child',
+                viewMode: 'form',
+                hasBothViews: true,
+                hasFormView: true,
+                hasTableView: true,
+                hasNavigation: false,
+                fields: [{
+                    name: 'ChildID',
+                    fieldName: 'ChildID',
+                    label: 'ChildID',
+                    showInNavigation: false,
+                    showInFormView: true,
+                    showInTableView: true,
+                    searchable: true
+                }]
             }]);
     });
 });

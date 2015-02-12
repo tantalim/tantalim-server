@@ -2,6 +2,7 @@
 
 var logger = require('../logger/default').main,
     _ = require('lodash'),
+    errors = require('../errors'),
     pageService = require('./pageService'),
     BluebirdPromise = require('bluebird');
 
@@ -10,7 +11,7 @@ var tables = {};
 function compile(modelDefinition) {
     var ARTIFACT = pageService.ARTIFACT; // Easy alias
 
-    logger.info('Starting compile', modelDefinition.name);
+    logger.info('Starting model compile', modelDefinition.name);
 
     function findField(fields, fieldName) {
         //console.log('Searching for ' + fieldName + ' in ', fields);
@@ -58,7 +59,8 @@ function compile(modelDefinition) {
                 }
                 logger.debug('Mapped field: ' + field.name + ' to ' + basisColumn.name);
                 field = _.defaults(field, basisColumn, {
-                    required: false
+                    required: false,
+                    label: basisColumn.name
                 });
                 // Keep this for backwards compatability
                 field.basisColumn = basisColumn;
@@ -84,7 +86,6 @@ function compile(modelDefinition) {
 
     function buildSteps(modelDefinition, todo) {
         if (_.isEmpty(modelDefinition.steps)) {
-            logger.info('Model has no steps');
             return;
         }
 
@@ -166,7 +167,7 @@ function compile(modelDefinition) {
     }
 
     function parseAndCompile(modelDefinition) {
-        logger.info('Running parseAndCompile');
+        logger.info('Running parseAndCompile for ' + modelDefinition.name);
         //logger.debug(modelDefinition);
         var todo = [];
 
@@ -174,7 +175,7 @@ function compile(modelDefinition) {
             throw Error('basisTable is required');
         }
         if (typeof modelDefinition.basisTable === 'string') {
-            logger.info('Building basisTable');
+            logger.info('Building basisTable ' + modelDefinition.basisTable);
             if (modelDefinition.basisTable in tables) {
                 var tableDefinition = tables[modelDefinition.basisTable];
                 modelDefinition.basisTable = {
@@ -227,12 +228,19 @@ function compile(modelDefinition) {
                     return compile(modelDefinition)
                         .then(resolve);
                 })
-                .catch(reject);
+                .catch(function(err) {
+                    errors.addTrace(err, {
+                        method: 'getDefinition',
+                        filename: __filename,
+                        params: [artifactType, artifactName]
+                    });
+                    reject(err);
+                });
         } else {
-            logger.info('Done');
+            logger.info('Done with modelCompiler ' + modelDefinition.name);
             return resolve(modelDefinition);
         }
-        logger.info('build promise');
+        logger.info('built promise for ' + modelDefinition.name);
     });
 }
 

@@ -33,3 +33,6 @@ exports.fieldType = function (fieldType, value, context) {
     }
     return '';
 };
+
+var pageCompiler = require('./pageCompiler');
+exports.prunePageDefinitionForClient = pageCompiler.prunePageDefinitionForClient;

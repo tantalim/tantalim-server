@@ -49,9 +49,9 @@ exports.desktop = function (req, res, appLocals) {
     function attachModelToPage(page, model) {
         page.model = model;
         if (page.children) {
-            _.forEach(page.children, function(childPage) {
+            _.forEach(page.children, function (childPage) {
                 if (childPage.model && model.children) {
-                    var childModel = _.find(model.children, function(childModel) {
+                    var childModel = _.find(model.children, function (childModel) {
                         if (childModel.name === childPage.model) {
                             return childModel;
                         }
@@ -153,5 +153,19 @@ exports.mobileBody = function (req, res) {
         })
         .catch(function (err) {
             return res.render('page/mobileError', err);
+        });
+};
+
+exports.artifactDefinition = function (req, res, appLocals) {
+    if (!req.user) {
+        res.redirect('/login');
+        return;
+    }
+    return service.getDefinition(req.params.artifactType, req.params.artifactName)
+        .then(function (artifact) {
+            return res.jsonp(artifact);
+        })
+        .catch(function (err) {
+            return res.jsonp(convertErrorToJson(err));
         });
 };

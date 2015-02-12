@@ -78,7 +78,7 @@
     angular.module('tantalim.common').factory('PageDefinition', function () {
         return {
             user: {{{json user}}},
-            page: {{{json page}}}
+            page: {{{prunePageDefinitionForClient page}}}
         };
     });
 </script>

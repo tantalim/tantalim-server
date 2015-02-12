@@ -61,7 +61,6 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                         pageCompiler.compile(jsonData)
                             .then(resolve)
                             .catch(reject);
-                        resolve(jsonData);
                         break;
 
                     default:
@@ -120,6 +119,7 @@ function getDefinition(artifactType, artifactName) {
     }
     var useCache = false; // For dev, turn if off
     return new BluebirdPromise(function (resolve, reject) {
+        logger.debug('------------------------------------');
         logger.debug('getDefinition for ' + artifactType + ':' + artifactName);
         getModuleName(artifactType, artifactName)
             .then(function (moduleName) {
