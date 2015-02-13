@@ -7,6 +7,22 @@ var _ = require('lodash'),
     sqlLogger = require('../logger/default').sql,
     async = require('async');
 
+var STATES = {
+    INSERTED: 'INSERTED',
+    UPDATED: 'UPDATED',
+    DELETED: 'DELETED',
+    CHILD_UPDATED: 'CHILD_UPDATED'
+};
+exports.STATES = STATES;
+
+
+function checkConnection() {
+    if (!knex) {
+        logger.warn('requiring knex again, since somehow it\'s getting destroyed');
+        knex = require('knex').knex;
+    }
+}
+
 function getColumnDefault(field) {
     if (field.basisColumn) {
         if (field.basisColumn.columnDefault) {
@@ -42,7 +58,7 @@ function getColumnHardDefaultOnInsert(field, row) {
     }
 }
 
-function childUpdate(modelDefinition, row) {
+function childUpdate(modelDefinition, row, forceDelete) {
     return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting childUpdate() for ', modelDefinition.name);
 
@@ -55,6 +71,15 @@ function childUpdate(modelDefinition, row) {
         async.each(modelDefinition.children, function (childModel, resolveEach) {
             var childData = row.children[childModel.name];
             if (childData) {
+                _.forEach(childData, function(childRow) {
+                    if (forceDelete) {
+                        childRow.state = STATES.DELETED;
+                    } else {
+                        if (childRow.state === STATES.INSERTED && childModel.parentLink) {
+                            childRow.data[childModel.parentLink.childField] = row.data[childModel.parentLink.parentField];
+                        }
+                    }
+                });
                 exports.save(childModel, childData)
                     .then(function () {
                         resolveEach();
@@ -77,7 +102,9 @@ function childUpdate(modelDefinition, row) {
 function insertData(modelDefinition, row) {
     return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting insertData() for ', modelDefinition.name);
+        //console.log(row);
 
+        checkConnection();
         var sql = knex(modelDefinition.basisTable.dbName);
 
         var sqlReadyRow = {};
@@ -103,10 +130,17 @@ function insertData(modelDefinition, row) {
                     logger.debug('updating %s with autoincrement %d', modelDefinition.instanceID.name, insertId[0]);
                     row.id = insertId[0];
                     row.data[modelDefinition.instanceID.name] = row.id;
+
+
                 } else {
                     row.id = row.tempID;
                 }
-                resolve();
+                childUpdate(modelDefinition, row)
+                    .then(function () {
+                        resolve(row);
+                    }, function (err) {
+                        reject(err);
+                    });
             }, function (err) {
                 reject(err);
             });
@@ -117,6 +151,7 @@ function updateData(modelDefinition, row) {
     return new BluebirdPromise(function (resolve, reject) {
         logger.debug('starting updateData() for ', modelDefinition.name);
 
+        checkConnection();
         var sql = knex(modelDefinition.basisTable.dbName);
 
         var sqlReadyRow = (function getSqlReadyRow() {
@@ -187,39 +222,45 @@ function updateData(modelDefinition, row) {
 
 function deleteData(modelDefinition, row) {
     return new BluebirdPromise(function (resolve, reject) {
-        logger.debug('starting deleteData() for ', modelDefinition.name);
+        // Delete my children first
+        childUpdate(modelDefinition, row, true)
+            .then(function () {
+                logger.debug('starting deleteData() on %s for ', modelDefinition.name, row);
 
-        var sql = knex(modelDefinition.basisTable.dbName);
+                checkConnection();
+                var sql = knex(modelDefinition.basisTable.dbName);
 
-        sql
-            .del()
-            .where(modelDefinition.instanceID.basisColumn.dbName, row.id);
-        sqlLogger.verbose(sql.toSql());
-        sqlLogger.debug(sql.getBindings());
+                sql
+                    .del()
+                    .where(modelDefinition.instanceID.basisColumn.dbName, row.id);
+                sqlLogger.verbose(sql.toSql());
+                sqlLogger.debug(sql.getBindings());
 
-        sql
-            .then(function (deleteCount) {
-                if (deleteCount !== 1) {
-                    sqlLogger.error(sql.toSql());
-                    var err = new Error('Failed to find one unique record to delete but found ' + deleteCount);
-                    reject(err);
-                    return;
-                }
-                delete row.state;
-                resolve();
-            }, function (err) {
-                reject(err);
+                sql
+                    .then(function (deleteCount) {
+                        if (deleteCount !== 1) {
+                            sqlLogger.error(sql.toSql());
+                            var err = new Error('Failed to find one unique record to delete but found ' + deleteCount);
+                            reject(err);
+                            return;
+                        }
+                        delete row.state;
+                        resolve();
+                    }, function (err) {
+                        reject(err);
+                    });
             });
     });
 }
 
 function saveSingleRow(modelDefinition, row) {
+    logger.info('saveSingleRow ', row.state, row.id);
     switch (row.state) {
-        case 'DELETED':
+        case STATES.DELETED:
             return deleteData(modelDefinition, row);
-        case 'INSERTED':
+        case STATES.INSERTED:
             return insertData(modelDefinition, row);
-        case 'UPDATED':
+        case STATES.UPDATED:
             return updateData(modelDefinition, row);
         default:
             return childUpdate(modelDefinition, row);
@@ -228,17 +269,12 @@ function saveSingleRow(modelDefinition, row) {
 
 exports.save = function (modelDefinition, data) {
     return new BluebirdPromise(function (resolve, reject) {
-        logger.debug('starting modelSaver.save() on %s', modelDefinition.name);
-//        logger.debug(data);
-        if (!knex) {
-            logger.warn('requiring knex again, since somehow it\'s getting destroyed');
-            knex = require('knex').knex;
-        }
-
+        logger.debug('starting modelSaver.save() on %s', modelDefinition.name, data);
+        checkConnection();
         if (!modelDefinition.instanceID) {
             throw Error('Cannot insert/update/delete an instance without an instanceID for ' + modelDefinition.name);
         }
-        logger.debug(modelDefinition.instanceID);
+        //logger.debug(modelDefinition.instanceID);
 
         async.each(data, function (row, resolveEach) {
             saveSingleRow(modelDefinition, row)
@@ -260,3 +296,6 @@ exports.save = function (modelDefinition, data) {
         });
     });
 };
+
+exports.deleteData = deleteData;
+exports.insertData = insertData;
