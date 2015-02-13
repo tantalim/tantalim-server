@@ -23,21 +23,11 @@ function getArtifactDirectory(moduleName) {
     return '';
 }
 
-function getArtifactFromSrc(artifactType, moduleName, artifactName) {
-
-    var trace = {
-        method: 'getArtifactFromSrc',
-        filename: __filename,
-        params: [artifactType, moduleName, artifactName]
-    };
-
-    // TODO Double check variables for injection
-    return new BluebirdPromise(function (resolve, bbReject) {
-        var reject = function(err) {
-            errors.addTrace(err, trace);
-            bbReject(err);
-        };
-        var file = getArtifactDirectory() + 'src/' + artifactType + 's/' + artifactName + '.json';
+function getRawArtifactFromSrc(artifactType, moduleName, artifactName) {
+    logger.debug('getRawArtifactFromSrc ', artifactType, moduleName, artifactName);
+    return new BluebirdPromise(function (resolve, reject) {
+        // TODO Double check variables for injection
+        var file = getArtifactDirectory(moduleName) + 'src/' + artifactType + 's/' + artifactName + '.json';
 
         logger.debug('reading file from ' + file);
         return fs.readFileAsync(file, 'utf8')
@@ -46,6 +36,24 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                 jsonData.name = artifactName;
                 jsonData.moduleName = moduleName;
                 logger.debug('resolving %s data for %s', artifactType, artifactName);
+                resolve(jsonData);
+            })
+            .catch(function(err) {
+                errors.addTrace(err, {
+                    method: 'getRawArtifactFromSrc',
+                    filename: __filename,
+                    params: [artifactType, moduleName, artifactName]
+                });
+                reject(err);
+            });
+    });
+}
+
+
+function getArtifactFromSrc(artifactType, moduleName, artifactName) {
+    return new BluebirdPromise(function (resolve, reject) {
+        return getRawArtifactFromSrc(artifactType, moduleName, artifactName)
+            .then(function(jsonData) {
                 switch (artifactType) {
                     case ARTIFACT.MODEL:
                         modelCompiler.compile(jsonData)
@@ -67,7 +75,14 @@ function getArtifactFromSrc(artifactType, moduleName, artifactName) {
                         resolve(jsonData);
                 }
             })
-            .catch(reject);
+            .catch(function(err) {
+                errors.addTrace(err, {
+                    method: 'getArtifactFromSrc',
+                    filename: __filename,
+                    params: [artifactType, moduleName, artifactName]
+                });
+                reject(err);
+            });
     });
 }
 
@@ -94,7 +109,6 @@ function getArtifactFromCache(artifactType, moduleName, artifactName) {
                         resolve(data);
                     })
                     .catch(function(err) {
-                        console.log('error', err);
                         errors.addTrace(err, {
                             method: 'getArtifactFromCache',
                             filename: __filename
@@ -108,7 +122,8 @@ function getArtifactFromCache(artifactType, moduleName, artifactName) {
 function getModuleName() {
     return new BluebirdPromise(function (resolve) {
         // This is the only one we support right now
-        resolve('tantalim-ide');
+        //resolve('tantalim-ide');
+        resolve('local');
     });
 }
 
@@ -151,4 +166,5 @@ function getDefinition(artifactType, artifactName) {
 }
 
 exports.ARTIFACT = ARTIFACT;
+exports.getRawArtifactFromSrc = getRawArtifactFromSrc;
 exports.getDefinition = getDefinition;
