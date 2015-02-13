@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('lodash'),
-    logger = require('../logger/default').debug,
+    logger = require('../logger/default').main,
     BluebirdPromise = require('bluebird'),
     modelSaver = require('./modelSaver'),
     dataReader = require('./dataReader'),
@@ -19,7 +19,7 @@ function getArtifactWriterAndSource(artifactType, artifactName) {
                         if (!artifactSource) {
                             return reject('artifactSource %s not found named %s', artifactType, artifactName);
                         }
-                        console.info(artifactSource);
+                        logger.info(artifactSource);
                         logger.info('resolving getArtifactWriterAndSource');
                         resolve([artifactWriter, artifactSource]);
                     })
@@ -74,10 +74,10 @@ exports.importArtifact = function () {
                 var artifactWriter = results[0],
                     artifactSource = results[1];
 
-                console.log('artifactWriter=', artifactWriter);
-                console.log('artifactSource=', artifactSource);
+                logger.log('artifactWriter=', artifactWriter);
+                logger.log('artifactSource=', artifactSource);
                 var dataToInsert = convertSourceToData(artifactWriter, artifactSource);
-                console.log('dataToInsert=', dataToInsert);
+                logger.log('dataToInsert=', dataToInsert);
                 return removePreviousDatabaseInstance(artifactWriter, artifactSource.name)
                     .then(function () {
                         return modelSaver.insertData(artifactWriter, dataToInsert)
