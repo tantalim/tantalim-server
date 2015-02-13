@@ -52,6 +52,18 @@ function addFrontEndJavaScriptAndHtmlPartials(app) {
     });
 }
 
+function addSourceEtl(app) {
+    var sourceEtlController = require('../controllers/sourceEtlController');
+
+    app.get('/exportAll', function (req, res) {
+        sourceEtlController.exportAll(req, res);
+    });
+
+    app.get('/importAll', function (req, res) {
+        sourceEtlController.importAll(req, res);
+    });
+}
+
 function addLogins(app) {
     app.get('/logout', function (req, res) {
         req.logout();
@@ -101,5 +113,6 @@ module.exports = function (app) {
     addLogins(app);
     addUserPages(app);
     addFrontEndJavaScriptAndHtmlPartials(app);
+    addSourceEtl(app);
     addDataApi(app);
 };

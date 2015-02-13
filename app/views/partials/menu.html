@@ -17,7 +17,8 @@
                 <ul class="dropdown-menu">
                     {{#items}}
                     <li>
-                        <a href="/page/{{page}}/">{{title}}</a>
+                        {{#if page}}<a href="/page/{{page}}/">{{title}}</a>{{/if}}
+                        {{#if href}}<a href="{{href}}">{{title}}</a>{{/if}}
                     </li>
                     {{/items}}
                 </ul>
